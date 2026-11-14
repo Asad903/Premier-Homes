@@ -1,0 +1,26 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-11-10",
+	"compatibility_flags": ["global_fetch_strictly_public"],
+	"name": "premier-homes",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	// Preview URLs: every non-production Worker version gets its own URL
+	"workers_dev": true,
+	"preview_urls": true,
+	// SESSION is the binding the Astro Cloudflare adapter uses for sessions.
+	// `id` = production namespace, `preview_id` = namespace for previews / `wrangler dev --remote`.
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "dcb9cb4bf4104f9a80d1f39e2692cebe",
+			"preview_id": "d2c19af15d834a44b93b87d7539d7f1b"
+		}
+	]
+}

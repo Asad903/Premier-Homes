@@ -1,0 +1,105 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import BrandSwatch from "@/components/content/BrandSwatch.astro";
+import BrandSpecimen from "@/components/content/BrandSpecimen.astro";
+---
+
+<Layout
+  title="Brand"
+  description="Colour, type, buttons and tags used across the Premier Homes website."
+>
+  <!-- intro -->
+  <Section paddingBottom="small">
+    <ContentWrapper>
+      <Eyebrow>Premier Homes · Brand</Eyebrow>
+      <Heading tag="h1" variant="display">Design foundations</Heading>
+      <Paragraph variant="large" maxWidth={48}>
+        Colour, type, buttons and tags used across the Premier Homes website.
+      </Paragraph>
+    </ContentWrapper>
+  </Section>
+
+  <!-- colour -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper>
+      <Eyebrow class="margin-bottom-5">Colour</Eyebrow>
+      <Grid xsmall={2} medium={5}>
+        <BrandSwatch name="Primary blue" color="var(--brand-500)" value="#1047AE" usage="buttons, links, prices" />
+        <BrandSwatch name="Gold" color="var(--gold-500)" value="#FCB714" usage="highlight tags" />
+        <BrandSwatch name="Ink" color="var(--dark-900)" value="#1F2A37" usage="headings" />
+        <BrandSwatch name="Slate" color="var(--dark-700)" value="#4D5761" usage="body, nav" />
+        <BrandSwatch name="Overlay" color="var(--overlay)" value="#000000 at 75%" usage="dark tags" />
+        <BrandSwatch name="Mist" color="var(--light-200)" value="#F5F7FA" usage="soft backgrounds" outlined />
+        <BrandSwatch name="Line" color="var(--light-300)" value="#E5E7EB" usage="borders, dividers" />
+      </Grid>
+    </ContentWrapper>
+  </Section>
+
+  <!-- headings -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper>
+      <Eyebrow class="margin-bottom-5">Headings · Georgia 400 · Ink</Eyebrow>
+      <div>
+        <BrandSpecimen label="Display" spec="96 / 104% · -4%"><Heading tag="h2" variant="display">Design foundations</Heading></BrandSpecimen>
+        <BrandSpecimen label="H1" spec="72 / 110% · -4%"><Heading tag="h2" variant="h1">Find your home in Spain</Heading></BrandSpecimen>
+        <BrandSpecimen label="H2" spec="56 / 120% · -4%"><Heading tag="h2">Properties we love</Heading></BrandSpecimen>
+        <BrandSpecimen label="H3" spec="40 / 120% · -3%"><Heading tag="h3">Join us for a V.I.P. viewing trip</Heading></BrandSpecimen>
+        <BrandSpecimen label="H4" spec="32 / 125% · -2%"><Heading tag="h4">Explore Murcia &amp; Alicante</Heading></BrandSpecimen>
+        <BrandSpecimen label="H5" spec="24 / 130% · -2%"><Heading tag="h5">We build your shortlist</Heading></BrandSpecimen>
+        <BrandSpecimen label="H6" spec="18 / 140% · -1%"><Heading tag="h6">Tell us what you’re looking for</Heading></BrandSpecimen>
+      </div>
+    </ContentWrapper>
+  </Section>
+
+  <!-- body type -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper>
+      <Eyebrow class="margin-bottom-5">Text · General Sans</Eyebrow>
+      <div>
+        <BrandSpecimen label="Large · 400" spec="18 / 130%"><Paragraph variant="large">Helping you find the right home in Murcia &amp; Alicante</Paragraph></BrandSpecimen>
+        <BrandSpecimen label="Main · 500" spec="16 / 150%"><Paragraph variant="main">Helping you find the right home in Murcia &amp; Alicante</Paragraph></BrandSpecimen>
+        <BrandSpecimen label="Small · 500" spec="14 / 164%"><Paragraph variant="small">Tell us what you’re looking for</Paragraph></BrandSpecimen>
+      </div>
+    </ContentWrapper>
+  </Section>
+
+  <!-- buttons and tags -->
+  <Section paddingTop="small">
+    <Grid medium={2}>
+      <ContentWrapper>
+        <Eyebrow class="margin-bottom-5">Buttons · Radius 8</Eyebrow>
+        <ButtonWrapper>
+          <Button>Contact Us</Button>
+          <Button emphasis="secondary">Search</Button>
+          <Button variant="link">Read the guide</Button>
+        </ButtonWrapper>
+      </ContentWrapper>
+      <ContentWrapper>
+        <Eyebrow class="margin-bottom-5">Tags · Radius 4</Eyebrow>
+        <ButtonWrapper>
+          <Eyebrow variant="tag">4 bedrooms</Eyebrow>
+          <Eyebrow variant="highlight">Golf views</Eyebrow>
+        </ButtonWrapper>
+      </ContentWrapper>
+    </Grid>
+  </Section>
+
+  <!-- brand theme -->
+  <Section theme="brand" paddingTop="medium" paddingBottom="medium">
+    <ContentWrapper align="center">
+      <Eyebrow>Is there a move to Spain in your future?</Eyebrow>
+      <Heading>We know what it means to make Spain home</Heading>
+      <ButtonWrapper>
+        <Button>Read our story</Button>
+      </ButtonWrapper>
+    </ContentWrapper>
+  </Section>
+</Layout>

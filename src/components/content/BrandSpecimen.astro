@@ -1,0 +1,48 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"div"> & {
+  /** Style name. */
+  label: string;
+  /** Spec line, such as size, line height and tracking. */
+  spec: string;
+};
+
+const { label, spec, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={["brand-specimen_wrap", className]} {...rest}>
+  <div class="brand-specimen_meta text-style-small">
+    <p>{label}</p>
+    <p>{spec}</p>
+  </div>
+  <div class="brand-specimen_sample">
+    <slot />
+  </div>
+</div>
+
+<style is:global>
+  @layer components {
+    .brand-specimen_wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: baseline;
+      gap: var(--space-3);
+      padding-block: var(--space-4);
+      border-bottom: var(--border-width) solid var(--border);
+      @media (width >= 48rem) {
+        grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+        gap: var(--space-6);
+      }
+      .brand-specimen_meta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        color: var(--text-2);
+      }
+      .brand-specimen_sample > * {
+        margin: 0;
+      }
+    }
+  }
+</style>

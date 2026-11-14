@@ -1,0 +1,102 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { statusLabel, type Status } from "@/data/migration.ts";
+
+type Row = {
+  cells: string[];
+  /** Shown as a badge in the last column. */
+  status?: Status;
+};
+
+type Props = HTMLAttributes<"div"> & {
+  /** Column headings. Add a trailing `Status` heading when rows have a status. */
+  headings: string[];
+  rows: Row[];
+};
+
+const { headings, rows, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={["migration-table_wrap", className]} {...rest}>
+  <table class="migration-table_table text-style-small">
+    <thead>
+      <tr>
+        {headings.map((heading) => <th class="migration-table_head">{heading}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          {row.cells.map((cell, index) => (
+            <td class:list={["migration-table_cell", index === 0 && "first"]}>{cell}</td>
+          ))}
+          {row.status && (
+            <td class="migration-table_cell">
+              <span class={`migration-table_status ${row.status}`}>
+                {statusLabel[row.status]}
+              </span>
+            </td>
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style is:global>
+  @layer components {
+    .migration-table_wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      .migration-table_table {
+        width: 100%;
+        min-width: 40rem;
+        border-collapse: collapse;
+      }
+      .migration-table_head,
+      .migration-table_cell {
+        padding: var(--space-3) var(--space-4);
+        text-align: start;
+        vertical-align: top;
+        border-bottom: var(--border-width) solid var(--border);
+      }
+      tbody tr:last-child .migration-table_cell {
+        border-bottom: 0;
+      }
+      .migration-table_head {
+        background-color: var(--background-2);
+        font-weight: var(--primary-semibold);
+      }
+      .migration-table_cell.first {
+        font-weight: var(--primary-medium);
+        color: var(--text);
+      }
+      .migration-table_status {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-tag);
+        font-size: 0.75rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        &.done {
+          background-color: #dcfce7;
+          color: #14532d;
+        }
+        &.progress {
+          background-color: var(--gold-500);
+          color: var(--gold-text);
+        }
+        &.todo {
+          background-color: var(--light-300);
+          color: var(--dark-900);
+        }
+        &.blocked {
+          background-color: #fee2e2;
+          color: #7f1d1d;
+        }
+      }
+    }
+  }
+</style>

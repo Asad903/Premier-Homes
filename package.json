@@ -1,0 +1,43 @@
+{
+  "name": "premier-homes",
+  "type": "module",
+  "version": "0.0.1",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@astrojs/cloudflare": "^14.4.8",
+    "@astrojs/react": "^7.1.9",
+    "@astrojs/sitemap": "^3.7.4",
+    "@sanity/astro": "^3.6.2",
+    "@sanity/client": "^8.16.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "astro": "^7.4.7",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sanity": "^6.23.0",
+    "styled-components": "^6.6.0",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.162.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.2"
+  },
+  "lumos": {
+    "version": "1.0.3",
+    "commit": "9eb6523e70e49548a1e29d81ae26a5482fa0b790",
+    "scaffolded": "2026-11-14"
+  }
+}

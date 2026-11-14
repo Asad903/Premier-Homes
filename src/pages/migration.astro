@@ -1,0 +1,149 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Tabs from "@/components/interactive/Tabs.astro";
+import TabLink from "@/components/interactive/TabLink.astro";
+import MigrationTable from "@/components/content/MigrationTable.astro";
+import MigrationChecklist from "@/components/content/MigrationChecklist.astro";
+import { pages, redirects, seo, content, launch, type Status } from "@/data/migration.ts";
+
+const count = (items: { status: Status }[], status: Status) =>
+  items.filter((item) => item.status === status).length;
+
+const groups = ["Core", "Areas", "Templates", "Utility"] as const;
+const overview = [
+  ...groups.map((group) => {
+    const items = pages.filter((page) => page.group === group);
+    return {
+      cells: [
+        `Pages: ${group}`,
+        String(items.length),
+        String(count(items, "done")),
+        String(count(items, "progress")),
+        String(count(items, "todo") + count(items, "blocked")),
+      ],
+    };
+  }),
+  ...[
+    ["SEO checks", seo],
+    ["Content and integrations", content],
+  ].map(([label, items]) => ({
+    cells: [
+      label as string,
+      String((items as { status: Status }[]).length),
+      String(count(items as { status: Status }[], "done")),
+      String(count(items as { status: Status }[], "progress")),
+      String(
+        count(items as { status: Status }[], "todo") +
+          count(items as { status: Status }[], "blocked"),
+      ),
+    ],
+  })),
+];
+---
+
+<Layout
+  title="Migration tracker"
+  description="Webflow to Astro migration plan, page status, redirects and SEO checks."
+>
+  <Section paddingBottom="small">
+    <ContentWrapper>
+      <Eyebrow>Internal · Not indexed</Eyebrow>
+      <Heading tag="h1" variant="h1">Migration tracker</Heading>
+      <Paragraph variant="large" maxWidth={52}>
+        Moving premierhomesinspain.com from Webflow to Astro, Sanity and
+        Cloudflare. Statuses live in <code>src/data/migration.ts</code>.
+      </Paragraph>
+    </ContentWrapper>
+  </Section>
+
+  <Section paddingTop="none">
+    <Tabs>
+      <Fragment slot="links">
+        <TabLink>Overview</TabLink>
+        <TabLink>Pages</TabLink>
+        <TabLink>Redirects</TabLink>
+        <TabLink>SEO</TabLink>
+        <TabLink>Content</TabLink>
+        <TabLink>Launch</TabLink>
+      </Fragment>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">Where we are</Heading>
+        <MigrationTable
+          headings={["Area", "Total", "Done", "In progress", "To do"]}
+          rows={overview}
+        />
+        <Heading tag="h3" variant="h5" class="margin-top-6 margin-bottom-4">Approach</Heading>
+        <Paragraph maxWidth={64}>
+          1. Keep every URL and slug the same, so SEO value carries over and
+          redirects stay minimal. 2. Build templates and shared sections first,
+          then pages. 3. Import content into Sanity, then check each URL against
+          the live crawl. 4. Test on a Cloudflare preview URL, then cut over DNS.
+        </Paragraph>
+      </ContentWrapper>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">Pages</Heading>
+        <Paragraph maxWidth={64} class="margin-bottom-5">
+          117 URLs on the live sitemap: 9 top-level pages, 14 blog posts and 93
+          properties. Posts and properties are two templates fed from Sanity.
+        </Paragraph>
+        <MigrationTable
+          headings={["Path", "Page", "Group", "Design", "Notes", "Status"]}
+          rows={pages.map((page) => ({
+            cells: [page.path, page.title, page.group, page.design ? "In Paper" : "None", page.note ?? ""],
+            status: page.status,
+          }))}
+        />
+      </ContentWrapper>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">Redirects</Heading>
+        <Paragraph maxWidth={64} class="margin-bottom-5">
+          Because slugs stay identical, the list is short. Implement them in a
+          Cloudflare <code>_redirects</code> file or Bulk Redirects once the map
+          is confirmed.
+        </Paragraph>
+        <MigrationTable
+          headings={["From", "To", "Type", "Why", "Status"]}
+          rows={redirects.map((item) => ({
+            cells: [item.from, item.to, item.type, item.reason],
+            status: item.status,
+          }))}
+        />
+      </ContentWrapper>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">SEO</Heading>
+        <MigrationTable
+          headings={["Check", "Notes", "Status"]}
+          rows={seo.map((item) => ({
+            cells: [item.label, item.note ?? ""],
+            status: item.status,
+          }))}
+        />
+      </ContentWrapper>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">Content and integrations</Heading>
+        <MigrationTable
+          headings={["Area", "Detail", "Status"]}
+          rows={content.map((item) => ({
+            cells: [item.area, item.detail],
+            status: item.status,
+          }))}
+        />
+      </ContentWrapper>
+
+      <ContentWrapper>
+        <Heading tag="h2" variant="h3" class="margin-bottom-5">Launch checklist</Heading>
+        <MigrationChecklist groups={launch} />
+      </ContentWrapper>
+    </Tabs>
+  </Section>
+</Layout>

@@ -1,0 +1,88 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Choice from "@/components/form/Choice.astro";
+import Heading from "@/components/typography/Heading.astro";
+import type { LaunchGroup } from "@/data/migration.ts";
+
+type Props = HTMLAttributes<"div"> & {
+  groups: LaunchGroup[];
+};
+
+const { groups, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={["migration-checklist_wrap", className]} {...rest}>
+  <p class="migration-checklist_summary text-style-small" aria-live="polite">
+    <span class="migration-checklist_count">0</span> of <span class="migration-checklist_total">0</span> checked. Saved in this browser only.
+  </p>
+  {groups.map((group) => (
+    <div class="migration-checklist_group">
+      <Heading tag="h3" variant="h5">{group.title}</Heading>
+      <div class="migration-checklist_list">
+        {group.items.map((item) => <Choice label={item} />)}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style is:global>
+  @layer components {
+    .migration-checklist_wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+      .migration-checklist_summary {
+        color: var(--text-2);
+      }
+      .migration-checklist_group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+      .migration-checklist_list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+    }
+  }
+</style>
+
+<script>
+  const key = "premier-migration-checklist";
+
+  document
+    .querySelectorAll<HTMLElement>(".migration-checklist_wrap")
+    .forEach((wrap) => {
+      const boxes = [
+        ...wrap.querySelectorAll<HTMLInputElement>("input[type=checkbox]"),
+      ];
+      const count = wrap.querySelector(".migration-checklist_count");
+      const total = wrap.querySelector(".migration-checklist_total");
+      let saved: boolean[] = [];
+
+      try {
+        saved = JSON.parse(localStorage.getItem(key) ?? "[]");
+      } catch {
+        saved = [];
+      }
+
+      const update = () => {
+        if (count) count.textContent = String(boxes.filter((b) => b.checked).length);
+        if (total) total.textContent = String(boxes.length);
+      };
+
+      boxes.forEach((box, index) => {
+        box.checked = Boolean(saved[index]);
+        box.addEventListener("change", () => {
+          try {
+            localStorage.setItem(key, JSON.stringify(boxes.map((b) => b.checked)));
+          } catch {
+            /* storage unavailable: the checklist still works for this visit */
+          }
+          update();
+        });
+      });
+      update();
+    });
+</script>

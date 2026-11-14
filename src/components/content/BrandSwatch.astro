@@ -1,0 +1,52 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"div"> & {
+  /** Swatch name. */
+  name: string;
+  /** CSS color value shown as the fill. */
+  color: string;
+  /** Value shown beneath the name. */
+  value: string;
+  /** What the color is used for. */
+  usage: string;
+  /** Outline the swatch, for colors close to the background. */
+  outlined?: boolean;
+};
+
+const { name, color, value, usage, outlined = false, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={["brand-swatch_wrap", className]} {...rest}>
+  <div
+    class:list={["brand-swatch_color", outlined && "outlined"]}
+    style={`background-color: ${color};`}
+  >
+  </div>
+  <p class="brand-swatch_name text-style-main">{name}</p>
+  <p class="brand-swatch_value text-style-small">{value} · {usage}</p>
+</div>
+
+<style is:global>
+  @layer components {
+    .brand-swatch_wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      .brand-swatch_color {
+        height: 8.75rem;
+        border-radius: var(--radius-main);
+        &.outlined {
+          border: var(--border-width) solid var(--border);
+        }
+      }
+      .brand-swatch_name {
+        font-weight: var(--primary-semibold);
+        color: var(--text);
+      }
+      .brand-swatch_value {
+        color: var(--text-2);
+      }
+    }
+  }
+</style>
