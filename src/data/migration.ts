@@ -23,7 +23,8 @@ export type PageItem = {
 };
 
 export const pages: PageItem[] = [
-  { path: "/", title: "Home", group: "Core", design: true, status: "progress", note: "Placeholder hero only" },
+  { path: "/", title: "Home", group: "Core", design: true, status: "progress", note: "Nav and hero with search done; remaining sections to build one at a time" },
+  { path: "/info-guides", title: "Info guides", group: "Core", design: false, status: "todo", note: "Linked from the Paper nav; no equivalent on the live site yet" },
   { path: "/about-us", title: "About us", group: "Core", design: true, status: "todo" },
   { path: "/contact", title: "Contact", group: "Core", design: true, status: "todo", note: "Contact form needs a backend" },
   { path: "/listing", title: "Listing / search results", group: "Core", design: true, status: "todo", note: "Filters: new build/resale, location, type, beds, price" },
@@ -49,7 +50,7 @@ export type RedirectItem = {
 };
 
 export const redirects: RedirectItem[] = [
-  { from: "https://www.premierhomesinspain.com/*", to: "https://premierhomesinspain.com/:splat", type: "301", reason: "Live site redirects www to apex. Keep it.", status: "todo" },
+  { from: "https://www.<live-domain>/*", to: "https://<live-domain>/:splat", type: "301", reason: "Live site redirects www to apex. Keep it.", status: "todo" },
   { from: "/*/ (trailing slash)", to: "/* (no slash)", type: "301", reason: "Live site strips trailing slashes. Set Astro trailingSlash to never and verify.", status: "todo" },
   { from: "/properties/*", to: "Same URL", type: "301", reason: "93 URLs. Slugs stay identical so no redirect is needed. Test every one after import.", status: "todo" },
   { from: "/blog/*", to: "Same URL", type: "301", reason: "14 posts keep their slugs.", status: "todo" },
@@ -78,13 +79,13 @@ export const seo: CheckItem[] = [
 export type ContentItem = { area: string; detail: string; status: Status };
 
 export const content: ContentItem[] = [
-  { area: "Property documents in Sanity", detail: "Fields: reference, title, slug, price, beds, baths, area, location, type, new build or resale, tags, gallery, description, source agent. 93 live properties; slugs carry the source feed (danny-, tina-, premier-homes-).", status: "progress" },
+  { area: "Property documents in Sanity", detail: "Fields: reference, title, slug, price, beds, baths, area, location, type, new build or resale, tags, gallery, description, source agent. 93 live properties; slugs carry the source feed as a prefix.", status: "progress" },
   { area: "Property data source", detail: "Find out how properties get into Webflow today (manual, feed or sync) and what keeps them updated. This decides whether we import once or build a sync.", status: "blocked" },
   { area: "Blog posts in Sanity", detail: "14 posts: title, slug, date, read time, category, cover image, rich text body, SEO fields.", status: "todo" },
   { area: "Area pages content", detail: "Murcia, Alicante and new-build copy plus featured-property rules.", status: "todo" },
   { area: "FAQ, team and testimonials", detail: "Reusable documents so one edit updates every page that shows them.", status: "todo" },
   { area: "Images and files", detail: "Webflow CDN and an R2 bucket today. Re-host in Sanity or Cloudflare Images and keep the originals until launch.", status: "todo" },
-  { area: "Forms", detail: "Two forms on the live site (contact and newsletter). Rebuild with a Cloudflare Worker endpoint and decide where submissions go.", status: "todo" },
+  { area: "Forms", detail: "Two forms on the live site (contact and newsletter). The footer newsletter form is built but not connected: it needs a Cloudflare Worker endpoint and a decision on where submissions go.", status: "progress" },
   { area: "Third-party embeds", detail: "WhatsApp links, TikTok and Facebook links, video, the Swiper sliders and Remix icons. Replace with lighter equivalents.", status: "todo" },
   { area: "Fonts", detail: "General Sans and Georgia are self-hosted.", status: "done" },
   { area: "Logo, favicons and brand tokens", detail: "Real logo, favicons and Paper styleguide tokens applied.", status: "done" },
@@ -111,7 +112,7 @@ export const launch: LaunchGroup[] = [
     items: [
       "Freeze edits in Webflow",
       "Final content sync into Sanity",
-      "Deploy and attach the premierhomesinspain.com custom domain in Cloudflare",
+      "Deploy and attach the production custom domain in Cloudflare",
       "Confirm HTTPS and the www to apex redirect",
       "Spot-check 20 URLs, including properties and posts",
     ],

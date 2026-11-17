@@ -1,7 +1,10 @@
 ---
-import Img from "@/components/media/Img.astro";
-import logo from "@/assets/logo/logo.png";
-import { SITE_NAME } from "@/consts.ts";
+import { SITE_PHONE, SITE_PHONE_HREF, SITE_WHATSAPP, SITE_EMAIL, SOCIAL } from "@/consts.ts";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import art from "@/assets/graphics/footer-art.svg";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -9,120 +12,184 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
+
+type FooterLink = { label: string; href: string; external?: boolean };
+
+const columns: FooterLink[][] = [
+  [
+    { label: "Buying in Spain", href: "/buying-in-spain" },
+    { label: "Blog", href: "/blog" },
+    { label: "About Us", href: "/about-us" },
+  ],
+  [
+    { label: "New Builds", href: "/new-build-properties" },
+    { label: "Alicante Properties", href: "/alicante-properties" },
+    { label: "Murcia Properties", href: "/murcia-properties" },
+  ],
+  [
+    { label: "Facebook", href: SOCIAL.facebook, external: true },
+    { label: "Whatsapp", href: SITE_WHATSAPP, external: true },
+    { label: "Tiktok", href: SOCIAL.tiktok, external: true },
+  ],
+];
 ---
 
 {render && (
   <footer class="footer_wrap">
     <div class="footer_inner">
-      <div class="footer_top">
-        <a class="footer_logo" href="/" aria-label={SITE_NAME}>
-          <Img src={logo} alt={SITE_NAME} width={208} transparent />
-        </a>
-        <nav aria-label="Footer">
-          <ul class="footer_links">
-            <li>
-              <a class="footer_link" href="/">
-                Home
-              </a>
-            </li>
-            <li>
-              <a class="footer_link" href="/brand">
-                Brand
-              </a>
-            </li>
-            <li>
-              <a class="footer_link" href="/migration">
-                Migration
-              </a>
-            </li>
-          </ul>
+      <ContentWrapper variant="columns" column1Class="footer_start" column2Class="footer_end">
+        <Heading tag="h2" variant="h5">Subscribe to our newsletter</Heading>
+        <form class="footer_form" action="#" method="post" name="newsletter">
+          <label class="sr-only" for="footer-email">Email address</label>
+          <input
+            class="footer_input text-style-main"
+            id="footer-email"
+            name="email"
+            type="email"
+            placeholder="Enter email address"
+            autocomplete="email"
+            required
+          />
+          <button class="footer_submit" type="submit" aria-label="Subscribe">
+            <Icon class="footer_arrow" src={arrow} variant="medium" />
+          </button>
+        </form>
+        <div class="footer_contact">
+          <div>
+            <p class="text-style-main footer_label">Call Us</p>
+            <a class="footer_link contact text-style-large" href={SITE_PHONE_HREF}>{SITE_PHONE}</a>
+          </div>
+          <div>
+            <p class="text-style-main footer_label">Email</p>
+            <a class="footer_link contact text-style-large" href={`mailto:${SITE_EMAIL}`}>{SITE_EMAIL}</a>
+          </div>
+        </div>
+        <nav slot="column2" class="footer_nav" aria-label="Footer">
+          {columns.map((links) => (
+            <ul class="footer_list">
+              {links.map((link) => (
+                <li>
+                  <a
+                    class="footer_link text-style-large"
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener" : undefined}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ))}
         </nav>
-      </div>
-      <div class="footer_bottom">
-        <p class="footer_copyright text-style-small">
-          &copy; <span id="year">{new Date().getFullYear()}</span>&#160;
-          {SITE_NAME}
-        </p>
-      </div>
+      </ContentWrapper>
+    </div>
+    <div class="footer_art" aria-hidden="true">
+      <Icon src={art} variant="full-width" />
     </div>
   </footer>
 )}
 
-<script>
-  const year = document.querySelector<HTMLSpanElement>("#year");
-
-  if (year) {
-    year.textContent = new Date().getFullYear().toString();
-  }
-</script>
-
 <style is:global>
   @layer components {
     .footer_wrap {
-      display: flex;
-      justify-content: center;
-      padding-block: var(--section-space-small);
-      padding-inline: var(--site-margin);
-      background-color: var(--background);
-      color: var(--text);
+      position: relative;
+      margin-top: auto;
+      overflow: clip;
+      background-color: var(--light-50);
       border-top: var(--border-width) solid var(--border);
     }
 
     .footer_inner {
-      width: 100%;
+      width: var(--site-width);
       max-width: var(--max-width-main);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-6);
+      margin-inline: auto;
+      padding-top: var(--section-space-small);
     }
 
-    .footer_top {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-4) var(--space-6);
+    .footer_form {
+      position: relative;
+      width: 100%;
+      max-width: 29rem;
+      margin-top: var(--space-4);
     }
 
-    .footer_logo {
-      display: block;
-      width: 13rem;
-      max-width: 100%;
-      transition: opacity var(--hover-duration) var(--hover-ease);
-      @media (hover: hover) {
-        &:hover {
-          opacity: 0.6;
-        }
+    .footer_input {
+      width: 100%;
+      padding: var(--space-3) var(--space-6) var(--space-3) 0.25rem;
+      background-color: transparent;
+      color: var(--text);
+      border: 0;
+      border-bottom: var(--border-width) solid var(--text);
+      border-radius: 0;
+      transition: border-color var(--hover-duration) var(--hover-ease);
+      &::placeholder {
+        color: var(--text);
+      }
+      &:hover,
+      &:focus-visible {
+        border-bottom-color: var(--brand-500);
+        outline: 0;
       }
     }
 
-    .footer_links {
+    .footer_submit {
+      position: absolute;
+      inset: 0 0 0 auto;
+      display: flex;
+      align-items: center;
+      padding-inline: var(--space-2);
+      color: var(--text);
+    }
+
+    .footer_contact {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      gap: var(--space-4);
-      font-size: var(--text-small);
-      font-weight: var(--primary-medium);
+      gap: var(--space-4) var(--space-5);
+      margin-top: var(--space-7);
+    }
+
+    .footer_label {
+      color: color-mix(in lab, currentcolor 75%, transparent);
+    }
+
+    .footer_nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-5) var(--space-6);
+      width: 100%;
+    }
+
+    .footer_list {
+      display: flex;
+      flex-direction: column;
     }
 
     .footer_link {
-      color: var(--text-2);
-      text-decoration: none;
+      display: inline-block;
+      padding-block: 1.2em;
+      color: var(--dark-700);
+      font-weight: var(--primary-medium);
       transition: color var(--hover-duration) var(--hover-ease);
+      &.contact {
+        color: var(--dark-900);
+        padding-block: 0.75em;
+      }
       @media (hover: hover) {
         &:hover {
-          color: var(--text);
+          color: var(--brand-500);
+          text-decoration: underline;
         }
       }
     }
 
-    .footer_bottom {
-      padding-top: var(--space-4);
-      border-top: var(--border-width) solid var(--border);
-    }
-
-    .footer_copyright {
-      color: var(--text-2);
+    .footer_art {
+      width: 110%;
+      max-width: 118rem;
+      margin-inline: auto;
+      margin-top: calc(var(--space-7) * -1);
+      translate: -3% 0;
     }
   }
 </style>

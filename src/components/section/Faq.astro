@@ -1,0 +1,111 @@
+---
+import type { ComponentProps } from "astro/types";
+import { SITE_WHATSAPP } from "@/consts.ts";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Accordion from "@/components/interactive/Accordion.astro";
+import AccordionItem from "@/components/interactive/AccordionItem.astro";
+import Icon from "@/components/media/Icon.astro";
+import Img from "@/components/media/Img.astro";
+import logoIcon from "@/assets/logo/logo-icon.svg";
+import whatsapp from "@/assets/icons/whatsapp-color.svg";
+import calLogo from "@/assets/images/cal-logo.png";
+
+type Props = Pick<ComponentProps<typeof Section>, "render">;
+
+const { render = true } = Astro.props;
+
+const answer =
+  "We work with buyers, sellers, and investors across Alicante and Murcia regions, with deep local knowledge of neighborhoods, school districts, and market trends. Most of our clients are looking to buy or sell a primary residence, though we also handle investment properties, luxury listings, and relocations.";
+
+const questions = [
+  "What areas do you serve?",
+  "How much does it cost to work with an agent?",
+  "Do you help first-time homebuyers?",
+  "How long does it typically take to buy a home?",
+  "Do you work with buyers who aren’t pre-approved yet?",
+  "Do you handle rentals, or just sales?",
+];
+---
+
+<Section render={render}>
+  <ContentWrapper variant="columns">
+    <Heading tag="h2" variant="h2">Have questions? <br />We’ve got answers!</Heading>
+    <div class="faq_card">
+      <div class="faq_logo">
+        <Icon src={logoIcon} variant="full-width" />
+      </div>
+      <p class="faq_text text-style-h6">Didn’t find the answer? Reach out to us for a one-on-one conversation.</p>
+      <a class="faq_action text-style-large" href="/contact">
+        <Img class="faq_action_icon" src={calLogo} alt="" width={64} transparent />
+        <span class="text-style-trim">Book a call</span>
+      </a>
+      <a class="faq_action text-style-large" href={SITE_WHATSAPP} target="_blank" rel="noopener">
+        <Icon class="faq_action_icon" src={whatsapp} variant="small" />
+        <span class="text-style-trim">Chat on Whatsapp</span>
+      </a>
+    </div>
+    <Accordion slot="column2" openFirst={true}>
+      {questions.map((question) => (
+        <AccordionItem heading={question}>
+          <Paragraph>{answer}</Paragraph>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </ContentWrapper>
+</Section>
+
+<style is:global>
+  @layer components {
+    .faq_card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      width: 100%;
+      margin-top: var(--space-6);
+      padding: var(--space-5);
+      background-color: var(--background-2);
+    }
+
+    .faq_logo {
+      width: 4rem;
+      padding: var(--space-1);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-small);
+      background-color: var(--background);
+    }
+
+    .faq_text {
+      font-family: var(--primary-family);
+      font-weight: var(--primary-regular);
+      color: color-mix(in lab, currentcolor 75%, transparent);
+      margin-block: var(--space-4) var(--space-6);
+    }
+
+    .faq_action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding-block: var(--space-3);
+      background-color: var(--background);
+      color: var(--text);
+      font-weight: var(--primary-regular);
+      transition: background-color var(--hover-duration) var(--hover-ease);
+      @media (hover: hover) {
+        &:hover {
+          background-color: var(--light-300);
+        }
+      }
+    }
+
+    .faq_action_icon {
+      flex: none;
+      width: 1.5rem;
+      aspect-ratio: 1 / 1;
+    }
+  }
+</style>

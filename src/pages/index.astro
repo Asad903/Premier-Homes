@@ -1,9 +1,240 @@
 ---
+import { SITE_NAME, SITE_URL, SITE_PHONE_HREF, SITE_EMAIL, SOCIAL } from "@/consts.ts";
 import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Icon from "@/components/media/Icon.astro";
+import stars from "@/assets/icons/stars.svg";
+import google from "@/assets/icons/google.svg";
+import facebook from "@/assets/icons/facebook.svg";
+import Faq from "@/components/section/Faq.astro";
+import { reviews, reviewColumns } from "@/data/reviews.ts";
 import HeroHome from "@/components/section/HeroHome.astro";
+import TileBand from "@/components/content/TileBand.astro";
+import ExploreVideo from "@/components/section/ExploreVideo.astro";
+import ViewingTrip from "@/components/section/ViewingTrip.astro";
+import BannerHome from "@/components/section/BannerHome.astro";
+import FeaturesHome from "@/components/section/FeaturesHome.astro";
+
+const avatars = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/images/reviews/*",
+  { eager: true },
+);
+const avatar = (file?: string) =>
+  file ? avatars[`/src/assets/images/reviews/${file}`]?.default.src : undefined;
+const sourceIcon = { google, facebook };
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: `${SITE_URL}/apple-touch-icon.png`,
+  image: `${SITE_URL}/og-image.jpg`,
+  telephone: SITE_PHONE_HREF.replace("tel:", ""),
+  email: SITE_EMAIL,
+  areaServed: ["Murcia", "Alicante"],
+  sameAs: [SOCIAL.facebook, SOCIAL.tiktok],
+};
 ---
 
-<Layout theme="light">
+<Layout
+  theme="light"
+  title="Property for Sale in Murcia & Alicante"
+  description="Family-run estate agents in Murcia and Alicante. Find new build and resale homes with honest local advice, from first viewing to long after you get the keys."
+  imageAlt="Solmar Homes: find the right home in Murcia and Alicante"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />
   <!-- hero -->
   <HeroHome />
+  <TileBand />
+  <!-- explore -->
+  <Section paddingBottom="small">
+    <ContentWrapper variant="auto-width" class="align-items-start">
+      <Eyebrow>Explore Murcia &amp; Alicante</Eyebrow>
+      <Heading slot="column2" tag="h2" variant="h3" maxWidth={34}>
+        From quiet coastal mornings and lively town centres to golf resorts,
+        beaches and year-round communities, Murcia and Alicante offer many
+        different ways to live.
+      </Heading>
+    </ContentWrapper>
+  </Section>
+  <!-- explore video -->
+  <ExploreVideo />
+  <!-- viewing trip -->
+  <ViewingTrip />
+  <!-- banner -->
+  <BannerHome />
+  <!-- features -->
+  <FeaturesHome />
+  <TileBand />
+  <!-- reviews -->
+  <Section>
+    <ContentWrapper centered={true}>
+      <div class="reviews_rating">
+        <div class="reviews_stars">
+          <Icon src={stars} variant="full-width" />
+        </div>
+        <p class="text-style-h5">5.0</p>
+        <p class="text-style-small">
+          RECOMMENDATION ON{" "}
+          <a href={SOCIAL.googleReviews} target="_blank" rel="noopener">GOOGLE</a>{" "}
+          &amp;{" "}
+          <a href={SOCIAL.facebookReviews} target="_blank" rel="noopener">FACEBOOK</a>
+        </p>
+      </div>
+      <Heading tag="h2" variant="h2" maxWidth={22}>
+        Relationships That Continue After Completion
+      </Heading>
+    </ContentWrapper>
+    <Grid medium={2} large={3}>
+      {reviewColumns.map((names, column) => (
+        <div class:list={["reviews_col", column === 1 && "reverse"]}>
+          <div class="reviews_track">
+            {[0, 1].map((copy) => (
+              <ul class="reviews_group" aria-hidden={copy === 1 ? "true" : undefined}>
+                {names.map((name) => {
+                  const review = reviews[name];
+                  return (
+                    <li class="reviews_card">
+                      <p class="text-style-main reviews_text">{review.text}</p>
+                      <div class="reviews_author">
+                        <div class="reviews_person">
+                          {avatar(review.avatar) && (
+                            <img class="reviews_avatar" src={avatar(review.avatar)} alt="" width="44" height="44" loading="lazy" />
+                          )}
+                          <p class="text-style-main">{review.name}</p>
+                        </div>
+                        <Icon class="reviews_source" src={sourceIcon[review.source]} variant="small" />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ))}
+          </div>
+        </div>
+      ))}
+    </Grid>
+  </Section>
+  <!-- faq -->
+  <Faq />
 </Layout>
+
+<style is:global>
+  @layer components {
+    .reviews_rating {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2) var(--space-3);
+      a {
+        text-decoration: underline;
+      }
+    }
+
+    .reviews_stars {
+      width: 6.25rem;
+    }
+
+    .reviews_col {
+      --_gap: var(--space-5);
+      max-height: 57rem;
+      overflow: clip;
+      mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+      @media (width < 48rem) {
+        &:nth-child(n + 2) {
+          display: none;
+        }
+      }
+      @media (width >= 48rem) and (width < 64rem) {
+        &:nth-child(3) {
+          display: none;
+        }
+      }
+    }
+
+    .reviews_track {
+      display: flex;
+      flex-direction: column;
+      gap: var(--_gap);
+      animation: reviews_scroll 40s linear infinite;
+      .reviews_col.reverse & {
+        animation-direction: reverse;
+      }
+      @media (hover: hover) {
+        .reviews_col:hover & {
+          animation-play-state: paused;
+        }
+      }
+    }
+
+    .reviews_group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--_gap);
+    }
+
+    .reviews_card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      padding: var(--space-5);
+      background-color: var(--background-2);
+      border-radius: var(--radius-main);
+    }
+
+    .reviews_text {
+      white-space: pre-line;
+    }
+
+    .reviews_author {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    .reviews_person {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .reviews_avatar {
+      flex: none;
+      width: 2.75rem;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-round);
+    }
+
+    .reviews_source {
+      flex: none;
+      width: 1.5rem;
+    }
+
+    /* The list repeats once, so moving it by half of itself, plus half a gap, loops without a jump. */
+    @keyframes reviews_scroll {
+      to {
+        translate: 0 calc(-50% - var(--_gap) / 2);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reviews_col {
+        max-height: none;
+        mask-image: none;
+      }
+      .reviews_track {
+        animation: none;
+      }
+      .reviews_group[aria-hidden] {
+        display: none;
+      }
+    }
+  }
+</style>

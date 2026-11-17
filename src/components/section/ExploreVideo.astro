@@ -1,0 +1,82 @@
+---
+import type { ComponentProps } from "astro/types";
+import Video from "@/components/media/Video.astro";
+import poster from "@/assets/images/explore-poster.avif";
+
+type Props = Pick<ComponentProps<typeof Video>, "render">;
+
+const { render = true } = Astro.props;
+
+const videoSrc =
+  "https://pub-5af5397109ef42a7a415ac18da77e7cd.r2.dev/0e16e021-829d-4293-9ef3-fca440ddfd0b.mov";
+---
+
+{render && (
+  <section class="explore-video_wrap">
+    <div class="explore-video_sticky">
+      <div class="explore-video_frame">
+        <Video src={videoSrc} poster={poster.src} aria-hidden="true" />
+      </div>
+    </div>
+  </section>
+)}
+
+<style is:global>
+  @layer components {
+    .explore-video_wrap {
+      background-color: var(--background);
+    }
+
+    .explore-video_sticky {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .explore-video_frame {
+      width: 100%;
+      overflow: clip;
+    }
+
+    /* Pinned video that grows to full width as you scroll (needs scroll-driven animations). */
+    @media (width >= 48rem) {
+      @supports (animation-timeline: view()) {
+        .explore-video_wrap {
+          height: 200svh;
+          view-timeline: --explore-video block;
+        }
+
+        .explore-video_sticky {
+          position: sticky;
+          top: var(--nav-offset);
+          height: calc(100svh - var(--nav-offset));
+          align-items: flex-start;
+          transition:
+            top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .explore-video_frame {
+          scale: 0.68;
+          transform-origin: center top;
+          animation: explore-video_grow linear both;
+          animation-timeline: --explore-video;
+          animation-range: cover 30% cover 58%;
+        }
+      }
+    }
+
+    @keyframes explore-video_grow {
+      to {
+        scale: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .explore-video_frame {
+        animation: none;
+        scale: 1;
+      }
+    }
+  }
+</style>

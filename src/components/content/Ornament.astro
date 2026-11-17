@@ -1,0 +1,32 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Icon from "@/components/media/Icon.astro";
+import ornament from "@/assets/icons/ornament.svg";
+
+type Props = HTMLAttributes<"div"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Ornament color. */
+  variant?: "gold" | "light";
+};
+
+const { render = true, variant = "gold", class: className, ...rest } = Astro.props;
+---
+
+{render && (
+  <div class:list={["ornament_wrap", variant !== "gold" && variant, className]} aria-hidden="true" {...rest}>
+    <Icon src={ornament} variant="full-width" />
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    .ornament_wrap {
+      width: min(90%, 12.5rem);
+      color: var(--gold-500);
+      &.light {
+        color: var(--text);
+      }
+    }
+  }
+</style>

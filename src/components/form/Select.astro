@@ -209,7 +209,7 @@ const text = label ?? wording.label;
     .form-select_field {
       appearance: none;
       padding-inline-end: 3em;
-      &:has(option[value=""]:checked) {
+      &:has(option[value=""][disabled]:checked) {
         color: var(--text-2);
       }
     }

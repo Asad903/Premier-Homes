@@ -182,6 +182,8 @@
 
 .field-label {
   display: flex;
+  font-size: var(--text-small);
+  color: color-mix(in lab, currentcolor 75%, transparent);
 }
 
 .field-star {
@@ -194,9 +196,9 @@
   width: 100%;
   min-height: calc(1lh + var(--_field-pad-block) * 2 + var(--border-width) * 2);
   padding: var(--_field-pad-block) var(--_field-pad-inline);
-  background-color: var(--background-2);
+  background-color: var(--background);
   color: inherit;
-  border: var(--border-width) solid transparent;
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius-small);
   transition:
     background-color var(--hover-duration) var(--hover-ease),
@@ -206,7 +208,7 @@
   }
   @media (hover: hover) {
     &:hover:not(:disabled) {
-      background-color: var(--background-3);
+      background-color: var(--background-2);
     }
   }
   &:focus-visible {

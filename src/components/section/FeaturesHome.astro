@@ -1,0 +1,225 @@
+---
+import type { ComponentProps } from "astro/types";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Img from "@/components/media/Img.astro";
+import Ornament from "@/components/content/Ornament.astro";
+
+type Props = Pick<ComponentProps<typeof Section>, "render">;
+
+const { render = true } = Astro.props;
+
+const features = [
+  {
+    title: "A Wider Search",
+    text: "Access homes across Murcia and Alicante through our trusted network of agents and developers.",
+  },
+  {
+    title: "Honest Local Advice",
+    text: "We share honest guidance based on local knowledge and real experience.",
+  },
+  {
+    title: "One-to-One Support",
+    text: "You collaborate directly with us throughout your entire property journey.",
+  },
+  {
+    title: "Here After the Keys",
+    text: "Our support continues after you receive the keys and settle into Spain.",
+  },
+];
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/images/features/*.avif",
+  { eager: true },
+);
+const slots = ["a", "b", "c"].map((letter) =>
+  [1, 2, 3, 4].map(
+    (n) => images[`/src/assets/images/features/${letter}${n}.avif`].default,
+  ),
+);
+---
+
+<Section render={render} theme="brand" paddingTop="medium">
+  <ContentWrapper centered={true}>
+    <Eyebrow>Why Solmar Homes</Eyebrow>
+    <Ornament variant="light" class="margin-block-3" />
+    <Heading tag="h2" variant="h2" maxWidth={20}>
+      We Understand What It Means to Make Spain Home
+    </Heading>
+    <Paragraph maxWidth={52}>
+      With 20+ years of experience in the Spanish property market, we help you find the right home, in the right place, with honest advice and personal support from the first conversation to long after you collect the keys.
+    </Paragraph>
+  </ContentWrapper>
+  <div class="features-home_list">
+    <div class="features-home_images" aria-hidden="true">
+      <div class="features-home_sticky">
+        {slots.map((frames, slot) => (
+          <div class:list={["features-home_slot", slot === 1 && "second", slot === 2 && "third"]}>
+            {frames.map((frame, index) => (
+              <div class="features-home_frame" style={`--_i: ${index};`}>
+                <Img class="height-full" src={frame} width={420} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+    <Ornament variant="light" />
+    {features.map((feature) => (
+      <>
+        <div class="features-home_item">
+          <ContentWrapper centered={true}>
+            <Heading tag="h3" variant="h3">{feature.title}</Heading>
+            <div class="features-home_text">
+              <div class="features-home_text_inner">
+                <div class="features-home_text_pad">
+                  <Paragraph maxWidth={32}>{feature.text}</Paragraph>
+                </div>
+              </div>
+            </div>
+          </ContentWrapper>
+        </div>
+        <Ornament variant="light" />
+      </>
+    ))}
+  </div>
+</Section>
+
+<script>
+  const list = document.querySelector<HTMLElement>(".features-home_list");
+  const items = [...(list?.querySelectorAll<HTMLElement>(".features-home_item") ?? [])];
+
+  if (list && items.length) {
+    list.classList.add("enhanced");
+    items[0].classList.add("active");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            items.forEach((item) => item.classList.toggle("active", item === entry.target));
+          }
+        }
+      },
+      { rootMargin: "-40% 0px -40% 0px" },
+    );
+    items.forEach((item) => observer.observe(item));
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    .features-home_list {
+      position: relative;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-8);
+    }
+
+    /* The feature in the middle of the screen is full strength with its text open; the others dim and close. */
+    .features-home_list.enhanced .features-home_item {
+      opacity: 0.4;
+      transition: opacity 0.4s ease;
+      &.active {
+        opacity: 1;
+      }
+    }
+
+    .features-home_text {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.4s ease;
+    }
+
+    .features-home_text_inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .features-home_text_pad {
+      padding-block: var(--space-2);
+    }
+
+    .features-home_list.enhanced .features-home_item:not(.active) .features-home_text {
+      grid-template-rows: 0fr;
+    }
+
+    .features-home_images {
+      display: none;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .features-home_sticky {
+      position: sticky;
+      top: calc(var(--nav-offset) + var(--space-6));
+      margin-top: -10%;
+    }
+
+    .features-home_slot {
+      position: relative;
+      width: 13%;
+      aspect-ratio: 1 / 1.2;
+      margin-left: auto;
+      margin-right: 2%;
+      overflow: clip;
+      &.second {
+        width: 15.6%;
+        margin-top: var(--space-2);
+        margin-left: 5%;
+        margin-right: auto;
+      }
+      &.third {
+        width: 11.75%;
+        margin-top: var(--space-2);
+        margin-right: 10%;
+      }
+    }
+
+    .features-home_frame {
+      position: absolute;
+      inset: 0;
+      &:not(:first-child) {
+        clip-path: inset(100% 0 0 0);
+      }
+    }
+
+    @media (width >= 64rem) {
+      .features-home_images {
+        display: block;
+      }
+
+      /* Each strip swaps to its next photo as the list scrolls past. */
+      @supports (animation-timeline: view()) {
+        .features-home_list {
+          view-timeline: --features-home block;
+        }
+
+        .features-home_frame:not(:first-child) {
+          animation: features-home_reveal linear both;
+          animation-timeline: --features-home;
+          animation-range-start: calc(15% + var(--_i) * 20%);
+          animation-range-end: calc(35% + var(--_i) * 20%);
+        }
+      }
+    }
+
+    @keyframes features-home_reveal {
+      to {
+        clip-path: inset(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .features-home_frame:not(:first-child) {
+        animation: none;
+      }
+    }
+  }
+</style>

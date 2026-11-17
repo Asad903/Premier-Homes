@@ -1,0 +1,139 @@
+---
+import type { ComponentProps } from "astro/types";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import Img from "@/components/media/Img.astro";
+import Ornament from "@/components/content/Ornament.astro";
+import banner from "@/assets/images/banner-home.avif";
+
+type Props = Pick<ComponentProps<typeof Section>, "render">;
+
+const { render = true } = Astro.props;
+---
+
+{render && (
+  <section class="banner-home_wrap theme-brand">
+    <div class="banner-home_image" aria-hidden="true">
+      <Img class="height-full" src={banner} width={1728} />
+      <div class="banner-home_fade"></div>
+    </div>
+    <div class="banner-home_sticky">
+      <div class="banner-home_card">
+        <div class="banner-home_bg"></div>
+        <div class="banner-home_content">
+          <ContentWrapper centered={true}>
+            <Eyebrow>Is there a move to Spain in future?</Eyebrow>
+            <Ornament class="margin-block-3" />
+            <Heading tag="h2" variant="h2">We Know What It Means to Make Spain Home</Heading>
+            <Paragraph>
+              Solmar Homes is a family-run estate agency with more than <strong>20+ years</strong> of experience helping people buy property in Spain.
+            </Paragraph>
+            <Paragraph>
+              Having made Spain home ourselves, we understand the excitement, the questions and the uncertainty that can come with buying abroad. That’s why we keep things personal — <strong>honest advice, local knowledge and direct support from the first conversation to long after you collect the keys.</strong>
+            </Paragraph>
+            <Paragraph>
+              We don’t believe in simply finding you a property. We take the time to understand how you want to live, help you find the right area, and stay by your side throughout the journey.
+            </Paragraph>
+            <ButtonWrapper marginTop="6" class="width-full">
+              <Button element="link" href="/about-us" emphasis="secondary" class="width-full">
+                Read our story
+              </Button>
+            </ButtonWrapper>
+          </ContentWrapper>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<style is:global>
+  @layer components {
+    .banner-home_wrap {
+      position: relative;
+      overflow: clip;
+    }
+
+    .banner-home_image {
+      position: absolute;
+      inset: 0;
+    }
+
+    .banner-home_fade {
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5.625rem;
+      background-image: linear-gradient(var(--light-100), transparent);
+    }
+
+    .banner-home_sticky {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-block: var(--section-space-medium);
+    }
+
+    .banner-home_card {
+      position: relative;
+      width: min(var(--site-width), 46.875rem);
+      padding: var(--space-6);
+      text-align: center;
+    }
+
+    .banner-home_bg {
+      position: absolute;
+      inset: 0;
+      background-color: var(--background);
+    }
+
+    .banner-home_content {
+      position: relative;
+    }
+
+
+    /* The card stays pinned while its blue background grows to cover the photo, then flows into the next blue section. */
+    @media (width >= 48rem) {
+      @supports (animation-timeline: view()) {
+        .banner-home_wrap {
+          height: 200svh;
+          view-timeline: --banner-home block;
+        }
+
+        .banner-home_sticky {
+          position: sticky;
+          top: 0;
+          height: 100svh;
+          padding-block: 0;
+        }
+
+        .banner-home_card {
+          padding: var(--space-8);
+        }
+
+        .banner-home_bg {
+          animation: banner-home_cover ease-in both;
+          animation-timeline: --banner-home;
+          animation-range: cover 33% cover 66%;
+        }
+      }
+    }
+
+    @keyframes banner-home_cover {
+      to {
+        scale: 5;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .banner-home_bg {
+        animation: none;
+      }
+    }
+  }
+</style>

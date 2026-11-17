@@ -1,0 +1,32 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import tile from "@/assets/images/tile-band.png";
+
+type Props = HTMLAttributes<"div"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+};
+
+const { render = true, class: className, ...rest } = Astro.props;
+---
+
+{render && (
+  <div
+    class:list={["tile-band_wrap", className]}
+    style={`--_tile: url('${tile.src}');`}
+    aria-hidden="true"
+    {...rest}
+  />
+)}
+
+<style is:global>
+  @layer components {
+    .tile-band_wrap {
+      height: 2.75rem;
+      background-image: var(--_tile);
+      background-repeat: repeat-x;
+      background-size: auto 100%;
+      background-position: left top;
+    }
+  }
+</style>

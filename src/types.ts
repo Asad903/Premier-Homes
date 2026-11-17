@@ -6,6 +6,8 @@ export interface SeoProps {
   description?: string;
   /** Social image. Defaults to `/og-image.jpg`. */
   image?: string;
+  /** Alt text for the social image. Defaults to the site name. */
+  imageAlt?: string;
   /** Open Graph type. */
   type?: "website" | "article";
   /** Override `NOINDEX_ROUTES` for this page's robots tag. */

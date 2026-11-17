@@ -1,0 +1,117 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Input from "@/components/form/Input.astro";
+import Select from "@/components/form/Select.astro";
+
+type Props = HTMLAttributes<"form"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Results page the form submits to. */
+  action?: string;
+};
+
+const { render = true, action = "/listing", class: className, ...rest } = Astro.props;
+
+const euro = (n: number) => ({
+  value: String(n),
+  label: `€${n.toLocaleString("en-GB")}`,
+});
+
+const prices = [
+  75000, 100000, 150000, 200000, 250000, 300000, 400000, 500000, 750000, 1000000,
+].map(euro);
+
+const status = [
+  { value: "", label: "All Properties" },
+  { value: "new-build", label: "New Build" },
+  { value: "resale", label: "Resale" },
+];
+
+const types = [
+  { value: "", label: "All types" },
+  { value: "apartment", label: "Apartment" },
+  { value: "villa", label: "Villa" },
+  { value: "townhouse", label: "Townhouse" },
+  { value: "bungalow", label: "Bungalow" },
+  { value: "penthouse", label: "Penthouse" },
+  { value: "plot", label: "Plot" },
+];
+
+const beds = [
+  { value: "", label: "Any" },
+  ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: String(n) })),
+  { value: "5", label: "5+" },
+];
+
+const any = (options: { value: string; label: string }[]) => [
+  { value: "", label: "Any" },
+  ...options,
+];
+---
+
+{render && (
+  <form
+    class:list={["property-search_wrap theme-light", className]}
+    method="get"
+    action={action}
+    {...rest}
+  >
+    <div class="property-search_row main">
+      <Select name="status" label="New build/Resales?" options={status} value="" />
+      <Input
+        name="location"
+        label="Town or Region"
+        placeholder="Type a region or town - eg: Costa Calida, La Manga"
+      />
+      <Select name="type" label="Type(s)" options={types} value="" />
+    </div>
+    <div class="property-search_row">
+      <Select name="beds" label="Min Beds" options={beds} value="" />
+      <Select name="min_price" label="Min Price" options={any(prices)} value="" />
+      <Select name="max_price" label="Max Price" options={any(prices)} value="" />
+      <button class="button_wrap property-search_submit" type="submit">
+        <span class="button_text text-style-trim">Search</span>
+      </button>
+    </div>
+  </form>
+)}
+
+<style is:global>
+  @layer components {
+    .property-search_wrap {
+      width: 100%;
+      max-width: 67rem;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--light-300);
+
+      .property-search_row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: end;
+        gap: var(--space-4) var(--space-5);
+        @media (width >= 48rem) {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        @media (width >= 64rem) {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          &.main {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+          }
+        }
+        &.main {
+          @media (width < 64rem) {
+            grid-template-columns: minmax(0, 1fr);
+          }
+        }
+      }
+
+      .property-search_submit {
+        width: 100%;
+        min-height: 3rem;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,146 @@
+---
+import type { ComponentProps } from "astro/types";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import Img from "@/components/media/Img.astro";
+import visual from "@/assets/images/viewing-trip.avif";
+
+type Props = Pick<ComponentProps<typeof Section>, "render">;
+
+const { render = true } = Astro.props;
+
+const steps = [
+  {
+    title: "Tell Us What You’re Looking For",
+    text: "Share your budget, preferred areas and the kind of lifestyle you want.",
+  },
+  {
+    title: "We Build Your Shortlist",
+    text: "We hand-pick homes and areas that genuinely fit your brief.",
+  },
+  {
+    title: "Come and Explore",
+    text: "We collect you, arrange your stay and guide you through a relaxed, one-to-one viewing trip.",
+  },
+  {
+    title: "We Guide the Purchase",
+    text: "From negotiation to trusted professional support, we stay with you throughout.",
+  },
+  {
+    title: "We’re Still Here After Completion",
+    text: "Our help doesn’t stop when the keys are handed over.",
+  },
+];
+---
+
+<Section render={render} paddingTop="small" paddingBottom="small">
+  <ContentWrapper variant="columns">
+    <Eyebrow>Is there a move to Spain in future?</Eyebrow>
+    <Heading tag="h2" variant="h2">Join us for a V.I.P. viewing trip</Heading>
+    <ol class="viewing-trip_list">
+      {steps.map((step, index) => (
+        <li class="viewing-trip_step">
+          <span class="viewing-trip_num text-style-large">{index + 1}</span>
+          <div class="viewing-trip_text">
+            <h3 class="text-style-h6">{step.title}</h3>
+            <p class="viewing-trip_desc text-style-small">{step.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+    <ButtonWrapper marginTop="7">
+      <Button element="link" href="/contact" emphasis="secondary" class="width-full">
+        Book a viewing trip
+      </Button>
+    </ButtonWrapper>
+    <div slot="column2" class="viewing-trip_visual">
+      <div class="viewing-trip_parallax">
+        <Img class="height-full" src={visual} width={1004} />
+      </div>
+    </div>
+  </ContentWrapper>
+</Section>
+
+<style is:global>
+  @layer components {
+    .viewing-trip_list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      width: 100%;
+      margin-top: var(--space-6);
+    }
+
+    .viewing-trip_step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .viewing-trip_num {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.5rem;
+      aspect-ratio: 1 / 1;
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-small);
+    }
+
+    .viewing-trip_text {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      min-width: 0;
+    }
+
+    .viewing-trip_desc {
+      color: var(--text-2);
+    }
+
+    .viewing-trip_visual {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 5 / 6;
+      border-radius: var(--radius-main);
+      overflow: clip;
+    }
+
+    .viewing-trip_parallax {
+      position: absolute;
+      inset: -35% 0;
+    }
+
+    /* The photo drifts slower than the page: it is taller than its frame and slides within it. */
+    @supports (animation-timeline: view()) {
+      .viewing-trip_visual {
+        view-timeline: --viewing-trip-visual block;
+      }
+
+      .viewing-trip_parallax {
+        animation: viewing-trip_parallax linear both;
+        animation-timeline: --viewing-trip-visual;
+      }
+    }
+
+    @keyframes viewing-trip_parallax {
+      from {
+        translate: 0 -20%;
+      }
+      to {
+        translate: 0 20%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .viewing-trip_parallax {
+        animation: none;
+      }
+    }
+  }
+</style>
