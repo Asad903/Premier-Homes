@@ -1,0 +1,209 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import check from "@/assets/icons/check.svg";
+import close from "@/assets/icons/close.svg";
+import { getPropertiesBySlugs, formatPrice } from "@/utils/properties.ts";
+
+// The compared properties live in the URL (?p=slug-a,slug-b), so a comparison can be shared.
+export const prerender = false;
+
+const MAX = 3;
+const slugs = [...new Set((Astro.url.searchParams.get("p") ?? "").split(",").map((s) => s.trim()).filter(Boolean))].slice(0, MAX);
+const items = await getPropertiesBySlugs(slugs);
+
+const place = (p: (typeof items)[number]) => [p.town, p.province].filter(Boolean).join(", ");
+const text = (value?: string | number | null, suffix = "") => (value || value === 0 ? `${value}${suffix}` : "-");
+const rows: { label: string; value: (p: (typeof items)[number]) => string }[] = [
+  { label: "Location", value: (p) => text(place(p)) },
+  { label: "Listing", value: (p) => (p.listingType === "rent" ? "For rent" : "For sale") },
+  { label: "Build", value: (p) => (p.newBuild ? "New build" : "Resale") },
+  { label: "Status", value: (p) => text(p.status && p.status[0].toUpperCase() + p.status.slice(1)) },
+  { label: "Bedrooms", value: (p) => text(p.bedrooms) },
+  { label: "Bathrooms", value: (p) => text(p.bathrooms) },
+  { label: "Property Size", value: (p) => text(p.areaBuiltM2, " m²") },
+  { label: "Plot Size", value: (p) => text(p.areaPlotM2, " m²") },
+  { label: "Reference", value: (p) => text(p.reference) },
+];
+// Feature rows: every feature any compared property has, most common first.
+const tally = new Map<string, number>();
+for (const p of items) for (const f of new Set(p.features ?? [])) tally.set(f, (tally.get(f) ?? 0) + 1);
+const features = [...tally.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
+
+const without = (slug: string) => {
+  const rest = slugs.filter((s) => s !== slug);
+  return rest.length ? `/compare?p=${rest.map(encodeURIComponent).join(",")}` : "/compare";
+};
+---
+
+<Layout
+  theme="light"
+  title="Compare Properties"
+  description="Compare Premier Homes properties side by side: price, size, bedrooms, location and features."
+  noindex
+>
+  <Section theme="light" paddingTop="medium" paddingBottom="large">
+    <Heading tag="h1" variant="h2">Compare Properties</Heading>
+
+    {items.length === 0 ? (
+      <div class="compare-page_empty">
+        <p class="text-style-main">Nothing to compare yet. Add two or three properties from the listing using the compare button on each card.</p>
+        <Button element="link" href="/listing">Browse properties</Button>
+      </div>
+    ) : (
+      <div class="compare-page_scroll">
+        <div class="compare-page_table" style={`--_cols: ${items.length};`} role="table" aria-label="Property comparison">
+          <div class="compare-page_row head" role="row">
+            <div class="compare-page_label" role="columnheader"></div>
+            {items.map((p) => (
+              <div class="compare-page_cell" role="columnheader">
+                <a class="compare-page_card" href={`/properties/${p.slug}`}>
+                  <div class="compare-page_media">
+                    {p.imageUrl && <Img class="compare-page_img" src={p.imageUrl} width={720} height={540} alt="" />}
+                  </div>
+                  <span class="compare-page_title">{p.title}</span>
+                  <span class="compare-page_price">{formatPrice(p.price, p.currency, p.listingType)}</span>
+                </a>
+                <a class="compare-page_remove" href={without(p.slug)}>Remove<span class="u-sr-only"> {p.title}</span></a>
+              </div>
+            ))}
+          </div>
+          {rows.map((row) => (
+            <div class="compare-page_row" role="row">
+              <div class="compare-page_label" role="rowheader">{row.label}</div>
+              {items.map((p) => <div class="compare-page_cell" role="cell">{row.value(p)}</div>)}
+            </div>
+          ))}
+          {features.map((feature) => (
+            <div class="compare-page_row" role="row">
+              <div class="compare-page_label" role="rowheader">{feature}</div>
+              {items.map((p) => {
+                const has = p.features?.includes(feature);
+                return (
+                  <div class="compare-page_cell" role="cell">
+                    <span class:list={["compare-page_mark", has ? "yes" : "no"]} aria-label={has ? "Yes" : "No"}>
+                      <Icon src={has ? check : close} variant="full-width" />
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </Section>
+</Layout>
+
+<style is:global>
+  @layer components {
+    .compare-page_empty {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-5);
+      margin-top: var(--space-6);
+    }
+
+    .compare-page_scroll {
+      margin-top: var(--space-6);
+      overflow-x: auto;
+      border: var(--border-width) solid #eaecf0;
+    }
+
+    .compare-page_table {
+      min-width: 40rem;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .compare-page_row {
+      display: grid;
+      grid-template-columns: minmax(8rem, 0.7fr) repeat(var(--_cols), minmax(0, 1fr));
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.1rem 1.75rem;
+      border-top: var(--border-width) solid #eaecf0;
+      &:nth-child(even):not(.head) {
+        background-color: #f9fafb;
+      }
+      &.head {
+        align-items: start;
+        padding-block: 2rem;
+        border-top: 0;
+      }
+    }
+
+    .compare-page_label {
+      font-weight: var(--primary-medium);
+      color: #344054;
+    }
+
+    .compare-page_cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .compare-page_card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .compare-page_media {
+      position: relative;
+      overflow: clip;
+      aspect-ratio: 1.44;
+      background-color: var(--background-2);
+    }
+
+    .compare-page_img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .compare-page_title {
+      font-size: 1.25rem;
+      line-height: 1.25;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+    }
+
+    .compare-page_price {
+      font-size: 1.5rem;
+      line-height: 1.2;
+      font-weight: var(--primary-semibold);
+      letter-spacing: -0.01em;
+      color: var(--brand-500);
+    }
+
+    .compare-page_remove {
+      align-self: flex-start;
+      font-size: 0.875rem;
+      color: #667085;
+      text-decoration: underline;
+    }
+
+    .compare-page_mark {
+      display: block;
+      width: 1rem;
+      &.yes {
+        color: var(--brand-500);
+      }
+      &.no {
+        color: #ef4444;
+      }
+    }
+  }
+</style>

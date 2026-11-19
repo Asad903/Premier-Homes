@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import PropertyListing from "@/components/section/PropertyListing.astro";
+
+// Filters live in the URL and run as Sanity (GROQ) queries on the server.
+export const prerender = false;
+---
+
+<Layout
+  theme="light"
+  title="Property for Sale in Alicante, Costa Blanca"
+  description="Browse new build and resale homes for sale in Alicante and the Costa Blanca, listed by a family-run estate agency with honest local advice."
+  imageAlt="Whitewashed coastal town overlooking the Mediterranean"
+>
+  <PropertyListing heading="Let’s find your next home in Alicante" basePath="/alicante-properties" lock={{ province: "Alicante" }} />
+</Layout>

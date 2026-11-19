@@ -1,0 +1,215 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import CompareButton from "@/components/item/CompareButton.astro";
+import bath from "@/assets/icons/bath.svg";
+import bed from "@/assets/icons/bed.svg";
+import area from "@/assets/icons/area.svg";
+import id from "@/assets/icons/reference.svg";
+import { formatPrice, type PropertyCardData } from "@/utils/properties.ts";
+
+type Props = HTMLAttributes<"article"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Property to show. */
+  item: PropertyCardData;
+};
+
+const { render = true, item, class: className, ...rest } = Astro.props;
+const { title, slug, reference, status, newBuild, town, province, bedrooms, bathrooms, areaBuiltM2, features, imageUrl } = item;
+const place = [town, province].filter(Boolean).join(", ");
+const stats = [
+  { label: "Bathrooms", icon: bath, value: bathrooms },
+  { label: "Bedrooms", icon: bed, value: bedrooms },
+  { label: "Built area", icon: area, value: areaBuiltM2 ? `${areaBuiltM2} m²` : undefined },
+  { label: "Reference", icon: id, value: reference },
+].filter((stat) => stat.value !== undefined && stat.value !== null && stat.value !== "");
+const flagged = status && status !== "active";
+---
+
+{render && (
+  <article class:list={["property-card_wrap", className]} {...rest}>
+    <a class="property-card_link" href={`/properties/${slug}`}>
+      <div class="property-card_media">
+        {imageUrl && <Img class="property-card_img" src={imageUrl} width={720} height={500} alt={title} />}
+        {features?.length ? (
+          <ul class="property-card_tags">
+            {features.map((feature, index) => <li class:list={["property-card_tag", index === 1 && "highlight"]}>{feature}</li>)}
+          </ul>
+        ) : null}
+        <div class="property-card_badges">
+          <span class="property-card_badge">{newBuild ? "New build" : "Resale"}</span>
+          {flagged && <span class="property-card_badge flag">{status}</span>}
+        </div>
+      </div>
+      <div class="property-card_row">
+        <p class="property-card_meta">{place}</p>
+        {reference && <p class="property-card_meta">REF: {reference}</p>}
+      </div>
+      <div class="property-card_text">
+        <h3 class="property-card_title">{title}</h3>
+        <p class="property-card_price">{formatPrice(item.price, item.currency, item.listingType)}</p>
+      </div>
+      {stats.length > 0 && (
+        <ul class="property-card_stats">
+          {stats.map((stat) => (
+            <li class="property-card_stat" aria-label={`${stat.label}: ${stat.value}`}>
+              <span class="property-card_icon"><Icon src={stat.icon} variant="full-width" /></span>
+              <span>{stat.value}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </a>
+    <CompareButton class="property-card_compare" slug={slug} name={title} image={imageUrl} />
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    .property-card_wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Sits over the photo's top-right corner; a sibling of the link, since a button can't live inside an anchor. */
+    .property-card_compare {
+      position: absolute;
+      top: 1rem;
+      inset-inline-end: 1rem;
+      z-index: 2;
+    }
+
+    .property-card_link {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .property-card_media {
+      position: relative;
+      overflow: clip;
+      aspect-ratio: 1.44;
+      background-color: var(--background-2);
+    }
+
+    .property-card_img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      .property-card_link:hover & {
+        transform: scale(1.05);
+      }
+    }
+
+    .property-card_tags,
+    .property-card_badges {
+      z-index: 1;
+      position: absolute;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      padding: 1rem;
+    }
+    .property-card_tags {
+      inset: 0 auto auto 0;
+    }
+    .property-card_badges {
+      inset: auto auto 0 0;
+    }
+
+    .property-card_tag,
+    .property-card_badge {
+      padding: 0.4rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--light-100);
+      background-color: rgb(0 0 0 / 75%);
+    }
+    .property-card_tag {
+      font-size: 0.625rem;
+      line-height: 1.2;
+      &.highlight {
+        background-color: var(--gold-500);
+        color: var(--gold-text);
+      }
+    }
+    .property-card_badge {
+      font-size: 0.875rem;
+      line-height: 1.3;
+      background-color: var(--dark-700);
+      &.flag {
+        background-color: var(--gold-500);
+        color: var(--gold-text);
+      }
+    }
+
+    .property-card_row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .property-card_meta {
+      font-size: 0.75rem;
+      line-height: 1.33;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      color: var(--dark-700);
+    }
+
+    .property-card_text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .property-card_title {
+      font-family: var(--primary-family);
+      font-size: 1rem;
+      line-height: 1.25;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      color: var(--dark-900);
+    }
+
+    .property-card_price {
+      font-size: 1.125rem;
+      line-height: 1.22;
+      font-weight: var(--primary-semibold);
+      letter-spacing: -0.01em;
+      color: var(--brand-500);
+    }
+
+    .property-card_stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 0.25rem;
+      font-size: 1rem;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.005em;
+      color: #98a2b3;
+    }
+
+    .property-card_stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .property-card_icon {
+      flex: none;
+      width: 1.25rem;
+    }
+  }
+</style>

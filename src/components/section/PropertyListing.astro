@@ -1,0 +1,449 @@
+---
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Overlay from "@/components/media/Overlay.astro";
+import TileBand from "@/components/content/TileBand.astro";
+import hero from "@/assets/images/listing/hero.avif";
+import Grid from "@/components/wrapper/Grid.astro";
+import Input from "@/components/form/Input.astro";
+import Select from "@/components/form/Select.astro";
+import Button from "@/components/Button.astro";
+import PropertyCard from "@/components/item/PropertyCard.astro";
+import { readFilters, getProperties, PAGE_SIZE, type PropertyFilters } from "@/utils/properties.ts";
+
+type Props = {
+  /** Small label above the heading. */
+  eyebrow?: string;
+  /** Page heading. */
+  heading: string;
+  /** Path this page lives at, used by the filter form and Reset. */
+  basePath: string;
+  /** Filters fixed by the page itself (for example the province). They are applied on the server and hidden from the form. */
+  lock?: { province?: "Murcia" | "Alicante"; build?: "yes" };
+};
+
+const { eyebrow = "Properties", heading, basePath, lock = {} } = Astro.props;
+
+// Filters live in the URL and run as Sanity (GROQ) queries on the server; a page's own lock always wins.
+const f: PropertyFilters = { ...readFilters(Astro.url.searchParams), ...lock };
+const { total, items, pages } = await getProperties(f);
+
+// The slider's ends mean "no limit": 0 for the minimum, PRICE_MAX (shown as 1.5M+) for the maximum.
+const PRICE_MAX = 1500000;
+const PRICE_STEP = 25000;
+const lo = Math.min(f.minPrice, PRICE_MAX);
+const hi = f.maxPrice > 0 ? Math.min(f.maxPrice, PRICE_MAX) : PRICE_MAX;
+const any = (options: { value: string; label: string }[], label = "Any") => [{ value: "", label }, ...options];
+
+const build = [
+  { value: "", label: "All Properties" },
+  { value: "yes", label: "New" },
+  { value: "resale", label: "Resale" },
+];
+const provinces = any([{ value: "Murcia", label: "Murcia" }, { value: "Alicante", label: "Alicante" }], "Province");
+const types = any([{ value: "sale", label: "Sale" }, { value: "rent", label: "Rent" }], "All types");
+const statuses = any([
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "sold", label: "Sold" },
+  { value: "withdrawn", label: "Withdrawn" },
+]);
+const beds = any([1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ value: String(n), label: String(n) })));
+
+const pageHref = (page: number) => {
+  const params = new URLSearchParams(Astro.url.searchParams);
+  if (page > 1) params.set("page", String(page));
+  else params.delete("page");
+  const query = params.toString();
+  return query ? `?${query}` : Astro.url.pathname;
+};
+const first = total === 0 ? 0 : (f.page - 1) * PAGE_SIZE + 1;
+const last = Math.min(f.page * PAGE_SIZE, total);
+---
+
+  <!-- hero -->
+  <Section theme="dark" paddingTop="large" paddingBottom="large">
+    <Fragment slot="background">
+      <Img class="height-full" src={hero} width={1728} loading="eager" fetchPriority="high" alt="" />
+      <Overlay strength={20} />
+    </Fragment>
+    <ContentWrapper centered={true}>
+      <Eyebrow variant="muted">{eyebrow}</Eyebrow>
+      <Heading tag="h1" variant="h1" maxWidth={22}>{heading}</Heading>
+    </ContentWrapper>
+  </Section>
+  <TileBand />
+  <!-- filters and results -->
+  <Section theme="light" paddingTop="medium" paddingBottom="large">
+    <div class="listing_layout">
+      <form class="listing-filters_wrap theme-light" method="get" action={basePath} data-listing-form>
+        <div class="listing-filters_full">
+          <Input name="q" label="Search" placeholder="Title, town or feature (e.g. villa, pool)" value={f.q} />
+        </div>
+        <Input name="ref" label="Property ID" placeholder="Property ID" value={f.ref} />
+        {!lock.build && <Select name="build" label="New build/Resales?" options={build} value={f.build} />}
+        <div class="listing-filters_full">
+          <Input name="location" label="Town or Region" placeholder="Type a region or town - eg: Costa Calida, La Manga" value={f.location} />
+        </div>
+        {!lock.province && <Select name="province" label="Province" options={provinces} value={f.province} />}
+        <Select name="type" label="Type(s)" options={types} value={f.type} />
+        <div class="listing-filters_full price-range" data-price-range style={`--_from: ${lo / PRICE_MAX}; --_to: ${hi / PRICE_MAX};`}>
+          <div class="price-range_head">
+            <span class="field-label text-style-main" id="price-range-label">Price range</span>
+            <output class="price-range_output text-style-small" data-price-output for="price-min price-max"></output>
+          </div>
+          <div class="price-range_control">
+            <div class="price-range_track" aria-hidden="true"></div>
+            <div class="price-range_fill" aria-hidden="true"></div>
+            <input class="price-range_input" id="price-min" type="range" name="min_price" min="0" max={PRICE_MAX} step={PRICE_STEP} value={lo} aria-label="Minimum price" />
+            <input class="price-range_input" id="price-max" type="range" name="max_price" min="0" max={PRICE_MAX} step={PRICE_STEP} value={hi} aria-label="Maximum price" />
+          </div>
+        </div>
+        <Select name="status" label="Status" options={statuses} value={f.status} />
+        <Select name="beds" label="Min Beds" options={beds} value={f.beds ? String(f.beds) : ""} />
+        <div class="listing-filters_actions">
+          <noscript>
+            <button class="button_wrap" type="submit"><span class="button_text text-style-trim">Apply</span></button>
+          </noscript>
+          <a class="listing-filters_reset text-style-main" href={basePath}>Reset all</a>
+        </div>
+      </form>
+
+      <div class="listing_results">
+        <p class="listing_count text-style-small" data-total={total} aria-live="polite">
+          {total === 0 ? "No properties match these filters." : `Showing ${first}–${last} of ${total} properties`}
+        </p>
+
+        <div class="listing_list">
+          <Grid medium={2} large={2}>
+            {items.map((item) => <PropertyCard item={item} />)}
+          </Grid>
+        </div>
+
+        <div class="listing_more">
+          {f.page < pages && (
+            <Button element="link" emphasis="secondary" href={pageHref(f.page + 1)}>Load more</Button>
+          )}
+        </div>
+      </div>
+    </div>
+  </Section>
+
+
+<style is:global>
+  @layer components {
+    /* The library's two-column layout is 1:1; the design needs a narrow filter column beside a wide results column. */
+    .listing_layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      gap: var(--space-7);
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        gap: var(--space-6);
+      }
+    }
+
+    .listing_list {
+      transition: opacity 0.2s ease;
+      &.is-loading {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+    }
+
+    .listing_results {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .listing-filters_wrap {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: end;
+      gap: 1.5rem;
+      padding: 2rem;
+      border: var(--border-width) solid var(--light-300);
+      background-color: var(--light-100);
+      @media (width >= 64rem) {
+        position: sticky;
+        top: calc(var(--nav-height) + var(--space-4));
+      }
+    }
+
+    .listing-filters_full {
+      grid-column: 1 / -1;
+    }
+
+    .price-range {
+      --_thumb: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .price-range_head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    .price-range_output {
+      font-weight: var(--primary-medium);
+      color: var(--brand-500);
+    }
+
+    .price-range_control {
+      position: relative;
+      height: var(--_thumb);
+    }
+
+    .price-range_track,
+    .price-range_fill {
+      position: absolute;
+      top: 50%;
+      height: 0.25rem;
+      translate: 0 -50%;
+      border-radius: var(--radius-round);
+    }
+    .price-range_track {
+      inset-inline: 0;
+      background-color: var(--light-300);
+    }
+    .price-range_fill {
+      inset-inline-start: calc(var(--_from) * (100% - var(--_thumb)) + var(--_thumb) / 2);
+      inset-inline-end: calc((1 - var(--_to)) * (100% - var(--_thumb)) + var(--_thumb) / 2);
+      background-color: var(--brand-500);
+    }
+
+    /* Two sliders share one rail: the rail ignores the pointer, only the thumbs take it. */
+    .price-range_input {
+      appearance: none;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: none;
+      pointer-events: none;
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: var(--_thumb);
+        height: var(--_thumb);
+        border: 2px solid var(--brand-500);
+        border-radius: var(--radius-round);
+        background-color: var(--light-100);
+        pointer-events: auto;
+        cursor: grab;
+      }
+      &::-moz-range-thumb {
+        width: var(--_thumb);
+        height: var(--_thumb);
+        box-sizing: border-box;
+        border: 2px solid var(--brand-500);
+        border-radius: var(--radius-round);
+        background-color: var(--light-100);
+        pointer-events: auto;
+        cursor: grab;
+      }
+      &:focus-visible {
+        outline: none;
+        &::-webkit-slider-thumb {
+          outline: var(--focus-width) solid var(--brand-500);
+          outline-offset: var(--focus-offset);
+        }
+        &::-moz-range-thumb {
+          outline: var(--focus-width) solid var(--brand-500);
+          outline-offset: var(--focus-offset);
+        }
+      }
+    }
+
+    .listing-filters_actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      grid-column: 1 / -1;
+    }
+
+    .listing-filters_reset {
+      text-decoration: underline;
+    }
+
+    .listing_more {
+      display: flex;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  // Filters apply as you change them and results swap in place; Load more appends.
+  // Everything is still filtered by the server (a Sanity GROQ query), so each change is one small request.
+  // Without JavaScript the form submits normally and Load more is a plain link.
+  const form = document.querySelector<HTMLFormElement>("[data-listing-form]");
+  const listBox = document.querySelector<HTMLElement>(".listing_list");
+  const moreBox = document.querySelector<HTMLElement>(".listing_more");
+  const count = document.querySelector<HTMLElement>(".listing_count");
+
+  if (form && listBox && moreBox && count) {
+    const base = new URL(form.action).pathname;
+    const cache = new Map<string, Document>();
+    let controller: AbortController | undefined;
+    let timer: number | undefined;
+
+    const grid = () => listBox.querySelector<HTMLElement>(".grid");
+    const cardCount = () => listBox.querySelectorAll(".property-card_wrap").length;
+    const moreLink = () => moreBox.querySelector<HTMLAnchorElement>("a");
+
+    // Price slider: two thumbs on one rail, a thumb resting at its end means "no limit".
+    const range = form.querySelector<HTMLElement>("[data-price-range]");
+    const lowInput = form.querySelector<HTMLInputElement>("#price-min");
+    const highInput = form.querySelector<HTMLInputElement>("#price-max");
+    const output = form.querySelector<HTMLElement>("[data-price-output]");
+    const money = (n: number, top: number) =>
+      n >= top ? "€1.5M+" : n >= 1_000_000 ? `€${n / 1_000_000}M` : n >= 1000 ? `€${n / 1000}k` : `€${n}`;
+
+    const drawRange = (moved?: HTMLInputElement) => {
+      if (!range || !lowInput || !highInput || !output) return;
+      const top = Number(highInput.max);
+      if (Number(lowInput.value) > Number(highInput.value)) {
+        // Thumbs can't cross: the one being dragged stops at the other.
+        if (moved === lowInput) lowInput.value = highInput.value;
+        else highInput.value = lowInput.value;
+      }
+      const low = Number(lowInput.value);
+      const high = Number(highInput.value);
+      range.style.setProperty("--_from", String(low / top));
+      range.style.setProperty("--_to", String(high / top));
+      output.textContent = `${low === 0 ? "€0" : money(low, top)} – ${money(high, top)}`;
+      // Keep the thumb that sits on top reachable when both rest at the same end.
+      lowInput.style.zIndex = low >= top * 0.9 ? "2" : "1";
+    };
+    lowInput?.addEventListener("input", () => drawRange(lowInput));
+    highInput?.addEventListener("input", () => drawRange(highInput));
+    drawRange();
+
+    const queryString = () => {
+      const params = new URLSearchParams();
+      new FormData(form).forEach((value, key) => {
+        const text = typeof value === "string" ? value.trim() : "";
+        if (text === "") return;
+        if (key === "min_price" && Number(text) === 0) return;
+        if (key === "max_price" && Number(text) === Number(highInput?.max)) return;
+        params.set(key, text);
+      });
+      return params.toString();
+    };
+
+    const load = async (url: string, signal?: AbortSignal) => {
+      const cached = cache.get(url);
+      if (cached) return cached;
+      const response = await fetch(url, { headers: { Accept: "text/html" }, signal });
+      if (!response.ok) throw new Error(String(response.status));
+      const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+      cache.set(url, doc);
+      return doc;
+    };
+
+    // Fetch the next page quietly so Load more feels instant.
+    const prefetch = () => {
+      const href = moreLink()?.href;
+      if (!href || cache.has(href)) return;
+      const run = () => load(href).catch(() => {});
+      "requestIdleCallback" in window ? requestIdleCallback(run) : setTimeout(run, 400);
+    };
+
+    const showMore = (doc: Document) => {
+      const next = doc.querySelector(".listing_more")?.children ?? [];
+      moreBox.replaceChildren(...[...next].map((node) => document.importNode(node, true)));
+      prefetch();
+    };
+
+    const applyFilters = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      const qs = queryString();
+      const url = qs ? `${base}?${qs}` : base;
+      listBox.classList.add("is-loading");
+      listBox.setAttribute("aria-busy", "true");
+      try {
+        const doc = await load(url, controller.signal);
+        const incoming = doc.querySelector(".listing_list");
+        if (incoming) listBox.replaceChildren(...[...incoming.childNodes].map((n) => document.importNode(n, true)));
+        const shown = doc.querySelector(".listing_count");
+        count.textContent = shown?.textContent ?? "";
+        count.setAttribute("data-total", shown?.getAttribute("data-total") ?? "0");
+        showMore(doc);
+        history.replaceState(null, "", qs ? `?${qs}` : base);
+        listBox.classList.remove("is-loading");
+        listBox.removeAttribute("aria-busy");
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        listBox.classList.remove("is-loading");
+        listBox.removeAttribute("aria-busy");
+        count.textContent = "Couldn’t update the results. Check your connection and try again.";
+      }
+    };
+
+    // Text fields wait for a pause in typing; selects apply straight away.
+    form.addEventListener("input", (event) => {
+      const target = event.target as HTMLElement;
+      if (target instanceof HTMLInputElement) {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(applyFilters, 300);
+      }
+    });
+    form.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLSelectElement) applyFilters();
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      window.clearTimeout(timer);
+      applyFilters();
+    });
+    form.querySelector<HTMLAnchorElement>(".listing-filters_reset")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select").forEach((field) => {
+        field.value = field.type === "range" ? (field === highInput ? field.max : field.min) : "";
+      });
+      drawRange();
+      applyFilters();
+    });
+
+    let busy = false;
+    moreBox.addEventListener("click", async (event) => {
+      const link = (event.target as HTMLElement).closest("a");
+      if (!link || !moreBox.contains(link)) return;
+      event.preventDefault();
+      if (busy) return;
+      busy = true;
+      const label = link.textContent ?? "Load more";
+      if (!cache.has(link.href)) {
+        link.setAttribute("aria-disabled", "true");
+        link.textContent = "Loading…";
+      }
+      try {
+        const doc = await load(link.href);
+        const cards = [...doc.querySelectorAll(".listing_list .property-card_wrap")];
+        const added = cards.map((card) => grid()?.appendChild(document.importNode(card, true)) as HTMLElement);
+        count.textContent = `Showing 1–${cardCount()} of ${count.getAttribute("data-total")} properties`;
+        added[0]?.querySelector<HTMLElement>(".property-card_link")?.focus({ preventScroll: true });
+        showMore(doc);
+      } catch {
+        link.textContent = "Couldn’t load more. Try again";
+        link.removeAttribute("aria-disabled");
+        window.setTimeout(() => (link.textContent = label), 3000);
+      } finally {
+        busy = false;
+      }
+    });
+
+    prefetch();
+  }
+</script>

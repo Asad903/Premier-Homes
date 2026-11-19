@@ -183,7 +183,8 @@
 .field-label {
   display: flex;
   font-size: var(--text-small);
-  color: color-mix(in lab, currentcolor 75%, transparent);
+  font-weight: var(--primary-medium);
+  color: color-mix(in lab, currentcolor 80%, var(--background));
 }
 
 .field-star {
@@ -198,7 +199,7 @@
   padding: var(--_field-pad-block) var(--_field-pad-inline);
   background-color: var(--background);
   color: inherit;
-  border: var(--border-width) solid var(--border);
+  border: var(--border-width) solid var(--background-3);
   border-radius: var(--radius-small);
   transition:
     background-color var(--hover-duration) var(--hover-ease),

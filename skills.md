@@ -109,3 +109,35 @@ Working notes for building a Webflow-to-Astro migration with **Lumos for Astro**
 - **Matching the live site numerically:** drive Chrome over the DevTools protocol (Node 22+ has a global `WebSocket`), load the live and local pages at 1440px, and print `getComputedStyle` for every text node in a section. Compare font size, weight, line height and position, not screenshots.
 - **Contact details and name:** keep the site name, URL, phone, email and social links in `src/consts.ts` so a client's real details can be swapped in with one edit.
 - **Type check:** `npx astro check` finds prop mistakes (for example `align` instead of `centered`) that a build does not.
+
+## Learned: Sanity schema, structure and CSV import
+
+- Group long schemas with `groups` (Main, Details, Location, Media, Feed & source, SEO) and set `group` on every field.
+- Rich text is `type: "array"` of `block`; add `image`, `file` and custom objects to `of` for freedom. `richtext` is not a Sanity type.
+- The built-in `geopoint` carries an altitude. Use an object with `lat` and `lng` numbers when only a map point is wanted.
+- Custom sidebar lives in `src/sanity/structure.ts` (`structureTool({ structure })`). Structure node IDs cannot contain spaces: slugify every ID built from data.
+- The Sanity CLI v8 `dataset import` needs a `sanity.cli.ts`. `scripts/import-ndjson.mjs` uses `@sanity/client` with `SANITY_WRITE_TOKEN` and `createOrReplace`, so imports are re-runnable (IDs come from the reference).
+- `scripts/properties-to-ndjson.mjs` converts the Webflow CSV; `diverse` picks rows so every status, agent, province and type is represented. Check the CSV row count: an old export may be in Downloads next to the new one.
+- Editing imported documents in the Studio and then re-importing overwrites the edits.
+
+## Learned: matching Paper exactly
+
+- Paper `get_jsx` on a big artboard returns megabytes (embedded images). It is saved to a file: load the JSON, take the longest text, strip `data:` URIs and `<svg>`, then condense each element to its key styles. Pass `fileId` explicitly.
+- Paper SVG icons export cleanly from the same JSX: replace stroke and fill colours with `currentColor`, drop the `style` attribute, and bake rotations into a `<g transform>`.
+- Paper uses fixed pixel text sizes (12/14/16/18). Lumos text scales fluidly, so use `rem` values in card CSS when the exact size matters, and `text-style-*` classes when it should scale.
+- Shared form look (label 14/500 slate, border `--background-3`) belongs in `patterns.css` `.field-*`, not in page CSS.
+- Measure local against the design with `measure.mjs` style CDP scripts: print computed font size, colour, padding and border for each element. Use `127.0.0.1`, not `localhost`, for the debug port, and wait about 6s for Chrome to start.
+
+## Learned: property detail page
+
+- `Img` with a remote URL needs both `width` and `height`, otherwise Astro downloads the file to measure it and the dev worker fails with "fetch failed" (a 500 with no useful message).
+- A prerendered route (like `404.astro`) can't be the target of `Astro.rewrite` from an on-demand page; return `new Response(..., { status: 404 })` instead.
+- Section content boxes shrink to fit their children: give full-width blocks `width: 100%`.
+- GROQ `order()` can't take a boolean expression: use `order(select(cond => 0, 1) asc, ...)`.
+- Sanity Portable Text is rendered by `src/utils/portable-text.ts` (paragraphs, headings, lists, marks, images, embeds), with image URLs projected in the GROQ (`asset->url`).
+
+## Learned: compare feature
+
+- The compare list is client-side only: `CompareTray.astro` (in `BaseLayout`) keeps up to 3 `{slug, name, img}` in `localStorage` key `ph_compare`. Anything with `[data-compare]` toggles via event delegation, so Load more and instant filters need no extra wiring; a MutationObserver on `<main>` re-syncs button states.
+- `/compare?p=a,b,c` is server-rendered from Sanity (`getPropertiesBySlugs`), so a comparison is a shareable link. Feature rows are the union of all compared properties' features.
+- A button can't sit inside the card's `<a>`, so `CompareButton` is a sibling positioned over the photo.

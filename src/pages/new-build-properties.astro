@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import PropertyListing from "@/components/section/PropertyListing.astro";
+
+// Filters live in the URL and run as Sanity (GROQ) queries on the server.
+export const prerender = false;
+---
+
+<Layout
+  theme="light"
+  title="New Build Properties in Murcia & Alicante"
+  description="Browse new build homes in Murcia and Alicante, listed by a family-run estate agency with honest local advice."
+  imageAlt="Whitewashed coastal town overlooking the Mediterranean"
+>
+  <PropertyListing heading="Newly Built" basePath="/new-build-properties" lock={{ build: "yes" }} />
+</Layout>

@@ -1,0 +1,70 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Icon from "@/components/media/Icon.astro";
+import compare from "@/assets/icons/compare.svg";
+
+type Props = HTMLAttributes<"button"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Property slug. */
+  slug: string;
+  /** Property title, shown in the compare list. */
+  name: string;
+  /** Thumbnail URL for the compare list. */
+  image?: string;
+};
+
+const { render = true, slug, name, image = "", class: className, ...rest } = Astro.props;
+---
+
+{render && (
+  <button
+    class:list={["compare-btn", className]}
+    type="button"
+    data-compare
+    data-slug={slug}
+    data-name={name}
+    data-img={image}
+    aria-pressed="false"
+    aria-label="Add to compare"
+    title="Add to compare"
+    {...rest}
+  >
+    <span class="compare-btn_icon"><Icon src={compare} variant="full-width" /></span>
+  </button>
+)}
+
+<style is:global>
+  @layer components {
+    .compare-btn {
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      aspect-ratio: 1;
+      border: var(--border-width) solid #e5e7eb;
+      border-radius: 0.25rem;
+      background-color: var(--light-100);
+      color: #111827;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      @media (hover: hover) {
+        &:hover:not(:disabled) {
+          border-color: var(--brand-500);
+        }
+      }
+      &[aria-pressed="true"] {
+        border-color: var(--brand-500);
+        background-color: var(--brand-500);
+        color: var(--light-100);
+      }
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .compare-btn_icon {
+      width: 1rem;
+    }
+  }
+</style>
