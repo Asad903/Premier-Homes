@@ -141,3 +141,34 @@ Working notes for building a Webflow-to-Astro migration with **Lumos for Astro**
 - The compare list is client-side only: `CompareTray.astro` (in `BaseLayout`) keeps up to 3 `{slug, name, img}` in `localStorage` key `ph_compare`. Anything with `[data-compare]` toggles via event delegation, so Load more and instant filters need no extra wiring; a MutationObserver on `<main>` re-syncs button states.
 - `/compare?p=a,b,c` is server-rendered from Sanity (`getPropertiesBySlugs`), so a comparison is a shareable link. Feature rows are the union of all compared properties' features.
 - A button can't sit inside the card's `<a>`, so `CompareButton` is a sibling positioned over the photo.
+
+## Learned: blog content model (Sanity)
+- Two document types: `post` (title, slug, category ref, publishedAt, readingTime, excerpt, featured, cover `image` with alt, `intro` sidebar object, `sideImages` max 2, `body` Portable Text with h2–h4, quote, images, embeds, SEO fields) and `category` (title, slug, description).
+- Images are real Sanity image assets (uploaded from the Webflow CDN), not URL strings like properties.
+- `scripts/import-blog.mjs <categories.csv> <posts.csv> [--dry]` imports both Webflow CSVs. Fixed ids (`category-<slug>`, `post-<slug>`) make it safe to re-run. Posts with Draft=true import as `drafts.post-<slug>`.
+- `html-to-blocks.mjs` now keeps links (markDefs). The importer strips the `utm_source=chatgpt.com` tag from source links and turns `<figure>`/`<img>` into image blocks.
+- The CSV `Category` column is the category slug. The CSV has no image alt text, so cover images use the post title as alt.
+
+## Learned: blog pages
+- `/blog` (`src/pages/blog/index.astro`) and `/blog/[slug]` are on-demand (`prerender = false`) and read Sanity through `src/utils/blog.ts` (`getPosts`, `getFeaturedPost`, `getPost`, `getBlogCategories`). Drafts never show, because the client reads the published perspective.
+- The category filter is `?category=<slug>`. Unknown slugs fall back to all posts. `?page=N` returns one page of 9. As on the property listing, JS swaps the results in place (fetch the server HTML, `replaceState`) when a category is picked, and Load more appends the next page. Both are plain links without JS.
+- Hero featured card = newest post with `featured == true`. The category dropdown is a native `<details>` with a tiny script for outside click and Escape, styled with `.button_wrap.secondary`.
+- Sanity returns `null`, not `undefined`, for an empty array. Destructuring defaults do not catch it, so use `?? []`.
+- Lumos resets paragraph and heading margins, and `text-box: trim-both` shrinks every text box. For long-form rich text the rules must be **unlayered** (outside `@layer components`) and set `text-box: normal`, or the live site's spacing cannot be matched. On trimmed headings add `margin-top-0` and a `margin-bottom-N` utility, because the default `_margin-top` is large.
+- `Img` draws a skeleton background. Add `transparent` for cut-out artwork such as the leaf.
+- Remote Sanity images accept `?auto=format&w=…`. Keep explicit `width` and `height` on `Img` for remote sources.
+- Post body images come through `portableTextToHtml`, which now renders `caption` as a `figcaption`.
+
+## Learned: about, contact and buying-in-spain pages
+- `PropertiesForYou` (shared by About and Buying) shows 3 sale properties: ones flagged `featured` first, then the newest active. Nothing is flagged yet, so it falls back to the newest. Rentals are excluded.
+- Marquee: set size with a class (`.marquee_wrap.about-marquee { --_item-height; --_gap-size }`), never an inline `style`. The component builds its own inline `--_count`, and a passed `style` replaces it.
+- Overhanging decoration (the About polaroids use negative margins) widens the page. Put `overflow: clip` on the section that holds it.
+- The library `Form` has a large default row gap (`--space-8`). Tighten it with `.my-card .form_fields { row-gap: 1rem }` for a compact card.
+- About images: the team and polaroid photos are stock (Pexels, free licence) by request, not real team photos. Swap `src/assets/images/about/team-*.webp`, `victoria.webp`, `mark.webp` and `bradley.webp` (and the handwritten `name-*.svg`) when real photos are ready. Large source PNGs were converted to WebP.
+- Unsplash and Pexels block automated browsing. Find photo ids with a web search, then download from `images.pexels.com/photos/<id>/pexels-photo-<id>.jpeg`.
+
+## Learned: homepage properties and blog sections
+- Both sections read Sanity per request, so `index.astro` now has `prerender = false`. "Properties we love" = `getFeaturedProperties(6)`; "Blogs & Guides" = `getLatestPosts` for All, Blog and Guide.
+- `Tabs` counts the direct children of `.tabs_panels` and does nothing if that differs from the number of links. Astro inlines a component's `<script>` after its first use, which adds a stray child. Wrap each panel's content in its own `<div>`.
+- To put the tab links beside a heading, make the `.tabs_wrap` `display: contents` and place `.tabs_bar` and `.tabs_panels` in the section container's grid areas. Restyle `.tabs_link` into pills with a two-class selector.
+- Slider arrows use smooth scrolling, so a headless test must wait about 2s before reading `scrollLeft`.

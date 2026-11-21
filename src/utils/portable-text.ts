@@ -8,7 +8,7 @@ type Block = {
   children?: Span[];
   markDefs?: { _key: string; _type: string; href?: string }[];
 };
-type Node = Block | { _type: "image"; url?: string; alt?: string } | { _type: "embed"; url?: string; caption?: string } | { _type: "file"; url?: string };
+type Node = Block | { _type: "image"; url?: string; alt?: string; caption?: string } | { _type: "embed"; url?: string; caption?: string } | { _type: "file"; url?: string };
 
 const escape = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -74,7 +74,8 @@ export function portableTextToHtml(nodes: unknown[] = []) {
       out.push(`<${tag}>${inner}</${tag}>`);
     } else if (node._type === "image" && node.url) {
       close();
-      out.push(`<figure><img src="${safeUrl(node.url)}" alt="${escape(node.alt ?? "")}" loading="lazy"></figure>`);
+      const caption = node.caption ? `<figcaption>${escape(node.caption)}</figcaption>` : "";
+      out.push(`<figure><img src="${safeUrl(node.url)}" alt="${escape(node.alt ?? "")}" loading="lazy">${caption}</figure>`);
     } else if (node._type === "embed" && node.url) {
       close();
       const src = embedUrl(node.url);

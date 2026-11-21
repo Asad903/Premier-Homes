@@ -26,6 +26,9 @@ export const structure: StructureResolver = async (S, context) => {
     if (province) places.get(country)!.add(province);
   }
   const countries = [...places.keys()].sort();
+  const categories: { _id: string; title: string }[] = await context
+    .getClient({ apiVersion: "2024-01-01" })
+    .fetch(`*[_type == "category"] | order(title asc){_id, title}`);
 
   return S.list()
     .title("Content")
@@ -101,6 +104,48 @@ export const structure: StructureResolver = async (S, context) => {
                 ),
             ]),
         ),
-      ...S.documentTypeListItems().filter((item) => item.getId() !== "property"),
+      S.listItem()
+        .id("blog")
+        .title("Blog")
+        .child(
+          S.list()
+            .title("Blog")
+            .items([
+              S.listItem()
+                .id("all-posts")
+                .title("All posts")
+                .child(S.documentTypeList("post").title("All posts").defaultOrdering([{ field: "publishedAt", direction: "desc" }])),
+              S.divider(),
+              S.listItem()
+                .id("posts-by-category")
+                .title("By category")
+                .child(
+                  S.list()
+                    .title("Category")
+                    .items(
+                      categories.map((category) =>
+                        S.listItem()
+                          .id(`posts-${category._id}`)
+                          .title(category.title)
+                          .child(
+                            S.documentList()
+                              .id(`posts-${category._id}`)
+                              .title(category.title)
+                              .filter(`_type == "post" && category._ref == $category`)
+                              .params({ category: category._id })
+                              .defaultOrdering([{ field: "publishedAt", direction: "desc" }]),
+                          ),
+                      ),
+                    ),
+                ),
+              S.listItem()
+                .id("featured-posts")
+                .title("Featured")
+                .child(S.documentList().id("featured-posts").title("Featured").filter(`_type == "post" && featured == true`)),
+              S.divider(),
+              S.documentTypeListItem("category").title("Categories"),
+            ]),
+        ),
+      ...S.documentTypeListItems().filter((item) => !["property", "post", "category"].includes(item.getId() ?? "")),
     ]);
 };

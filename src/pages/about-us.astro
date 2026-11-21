@@ -1,0 +1,426 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import Overlay from "@/components/media/Overlay.astro";
+import Marquee from "@/components/interactive/Marquee.astro";
+import Ornament from "@/components/content/Ornament.astro";
+import TileBand from "@/components/content/TileBand.astro";
+import PropertiesForYou from "@/components/section/PropertiesForYou.astro";
+import ViewingTrip from "@/components/section/ViewingTrip.astro";
+import Faq from "@/components/section/Faq.astro";
+import hero from "@/assets/images/about/hero.webp";
+import sea from "@/assets/images/about/sea.webp";
+import pattern from "@/assets/images/about/card-pattern.svg?url";
+import team1 from "@/assets/images/about/team-1.webp";
+import team2 from "@/assets/images/about/team-2.webp";
+import team3 from "@/assets/images/about/team-3.webp";
+import team4 from "@/assets/images/about/team-4.webp";
+import team5 from "@/assets/images/about/team-5.webp";
+import victoria from "@/assets/images/about/victoria.webp";
+import mark from "@/assets/images/about/mark.webp";
+import bradley from "@/assets/images/about/bradley.webp";
+import nameVictoria from "@/assets/images/about/name-victoria.svg";
+import nameMark from "@/assets/images/about/name-mark.svg";
+import nameBradley from "@/assets/images/about/name-bradley.svg";
+
+// The "Properties For You" strip reads Sanity, so the page renders on demand.
+export const prerender = false;
+
+const stats = [
+  { value: "0", text: "Deposits ever lost. Not one, in over 20 years." },
+  { value: "100%", text: "Of purchases completed" },
+  { value: "60 - 70%", text: "Of clients come through personal referral." },
+];
+
+// Stock photos from Pexels (free to use); swap for real team photos when they are ready.
+const photos = [
+  { src: team1, alt: "Friends sharing a meal at a restaurant" },
+  { src: team2, alt: "A couple beside a swimming pool" },
+  { src: team3, alt: "Friends toasting at a restaurant table" },
+  { src: team4, alt: "A couple dining on a restaurant terrace" },
+  { src: team5, alt: "Tables and chairs on a sunny restaurant terrace" },
+];
+
+const story = [
+  {
+    title: "2001: The Beginning",
+    text: "We arrived in Spain in 2001 with no office, no ready-made client list, and no certainty it would work. What we had was a clear sense that this region - Murcia, the Costa Calida, the areas around the Mar Menor - was genuinely special, and that people looking to buy here deserved someone who actually knew it. We built Premier Homes the way we’ve always run it: by talking to people, being honest with them, and staying in touch long after the sale. We never had a high-street office. We didn’t need one - by the time clients arrived in Spain, we already knew what they were looking for.",
+  },
+  {
+    title: "2008: A Pause, and a Return",
+    text: "In 2008 we came back to the UK - family reasons, and the market had changed. But we didn’t stop thinking about Murcia. We knew we’d come back, and about ten years ago, we did. Returning with fresh eyes confirmed what we’d always believed: Murcia offers something genuinely different. Coastline, sunshine, golf, real Spanish life - at a fraction of what the Costa del Sol costs. We came back not because we had to, but because we chose to.",
+  },
+  {
+    title: "Today",
+    text: "We’re based at our home on a golf resort in Torre-Pacheco, working the way we always have - personally, honestly, and without the overhead of a large agency behind us. Between us we have access to a network of around 50 to 60 local agents across Murcia and Alicante, and developer relationships built over 25 years that give our buyers access to new build projects before they’re widely advertised. Most of our clients come to us through recommendation. We think that tells you more about how we work than anything we could write here.",
+  },
+];
+
+const people = [
+  { id: "victoria", name: "Victoria", photo: victoria, label: nameVictoria },
+  { id: "mark", name: "Mark", photo: mark, label: nameMark },
+  { id: "bradley", name: "Bradley", photo: bradley, label: nameBradley },
+];
+---
+
+<Layout
+  theme="light"
+  title="About Premier Homes in Spain | Family-Owned Since 2001"
+  description="A family-owned property agency helping international buyers in Murcia and Alicante since 2001, from the first shortlist to the keys and beyond."
+  imageAlt="Sunset over hills and a town in south-east Spain"
+>
+  <!-- hero -->
+  <Section theme="dark" class="about-hero_wrap" containerClass="about-hero_contain" paddingTop="small" paddingBottom="small">
+    <Fragment slot="background">
+      <Img class="height-full" src={hero} width={1728} loading="eager" fetchPriority="high" alt="Sunset over hills and town in south-east Spain" />
+      <Overlay strength={20} />
+    </Fragment>
+    <div class="about-hero_text">
+      <Heading tag="h1" variant="h1" class="about-hero_title margin-top-0 margin-bottom-5">A Family-Owned Property Agency Built Around Long-Term Relationships</Heading>
+      <p class="about-hero_intro text-style-main">
+        Premier Homes was created from first-hand experience of what buying and moving to Spain can feel like when the right support is missing.
+      </p>
+    </div>
+  </Section>
+  <TileBand />
+
+  <!-- legacy -->
+  <Section theme="light" paddingTop="small" paddingBottom="none">
+    <div class="about-legacy_layout">
+      <Eyebrow>Our legacy</Eyebrow>
+      <div class="about-legacy_content">
+        <Heading tag="h2" variant="h3" class="about-legacy_title margin-top-0">
+          After first exploring Murcia and Alicante in 2001, we experienced how difficult an overseas move could feel without enough support. That experience shaped the way Premier Homes supports their clients from the first conversation to long after they collect keys.
+        </Heading>
+        <dl class="about-stats_list">
+          {stats.map((stat) => (
+            <div class="about-stats_item">
+              <dt class="about-stats_value">{stat.value}</dt>
+              <dd class="about-stats_text">{stat.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </Section>
+
+  <!-- team photos -->
+  <Section theme="light" paddingTop="small" paddingBottom="small" class="about-photos_wrap" containerClass="about-photos_contain">
+    <Marquee class="about-marquee" label="Photos of the Premier Homes team with clients">
+      {photos.map((photo) => <Img src={photo.src} width={1000} alt={photo.alt} />)}
+    </Marquee>
+  </Section>
+
+  <!-- family story -->
+  <Section theme="light" class="about-story_wrap" containerClass="about-story_contain" paddingTop="none" paddingBottom="none" style={`--_sea: url('${sea.src}');`}>
+    <div class="about-card_wrap" style={`--_pattern: url('${pattern}');`}>
+      <div class="about-card_top">
+        <Ornament />
+        <Heading tag="h2" variant="h2" class="about-card_title margin-top-0">The Family Behind<br />Premier Homes</Heading>
+      </div>
+      <div class="about-card_body">
+        {story.map((chapter) => (
+          <div class="about-card_chapter">
+            <h3 class="about-card_chapter_title text-style-large">{chapter.title}</h3>
+            <p class="about-card_chapter_text text-style-large">{chapter.text}</p>
+          </div>
+        ))}
+      </div>
+      <div class="about-card_people">
+        {people.map((person) => (
+          <figure class={`about-polaroid about-polaroid_${person.id}`}>
+            <div class="about-polaroid_crop">
+              <Img class="about-polaroid_img" src={person.photo} width={640} alt={`Portrait of ${person.name}`} />
+            </div>
+            <Icon class="about-polaroid_name" src={person.label} variant="full-width" aria-label={person.name} role="img" />
+          </figure>
+        ))}
+      </div>
+    </div>
+  </Section>
+
+  <PropertiesForYou />
+  <ViewingTrip />
+  <Faq />
+</Layout>
+
+<style is:global>
+  @layer components {
+    .about-hero_wrap {
+      justify-content: flex-end;
+    }
+
+    .about-hero_contain {
+      /* The live hero keeps the sunset clear of text, with the copy low on the photo. */
+      padding-top: calc(var(--text-main) * 19.125);
+      @media (width < 48rem) {
+        padding-top: calc(var(--text-main) * 12);
+      }
+    }
+
+    .about-hero_text {
+      max-width: 51rem;
+    }
+
+    .about-hero_title {
+      text-wrap: wrap;
+    }
+
+    .about-hero_intro {
+      max-width: 27rem;
+    }
+
+    .about-legacy_layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+      align-items: start;
+      width: 100%;
+      @media (width >= 64rem) {
+        grid-template-columns: calc(var(--text-main) * 17.9) minmax(0, 1fr);
+        gap: 0;
+      }
+    }
+
+    .about-legacy_content {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--text-main) * 3.75);
+    }
+
+    .about-legacy_title {
+      color: var(--dark-900);
+      text-wrap: wrap;
+    }
+
+    .about-stats_list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      width: 100%;
+      max-width: 64.25rem;
+      @media (width >= 48rem) {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+    }
+
+    .about-stats_item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3125rem;
+    }
+
+    .about-stats_value {
+      font-size: clamp(3rem, 4.4vw, 4rem);
+      line-height: 1.2;
+      font-weight: var(--primary-regular);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .about-stats_text {
+      max-width: 10.5rem;
+      font-size: 1rem;
+      line-height: 1.2;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.04em;
+    }
+
+    .marquee_wrap.about-marquee {
+      --_item-height: 24.5rem;
+      --_gap-size: 1.75rem;
+      @media (width < 48rem) {
+        --_item-height: 16rem;
+      }
+    }
+
+    /* The photo strip bleeds past the page margins. */
+    .about-photos_contain {
+      width: 100%;
+      max-width: none;
+    }
+
+    .about-story_wrap {
+      /* The polaroids hang past the card; keep them from widening the page. */
+      overflow: clip;
+      background-image: linear-gradient(var(--light-100), transparent 8%), var(--_sea);
+      background-position: 0 0, 50%;
+      background-repeat: repeat, no-repeat;
+      background-size: auto, cover;
+      padding-top: calc(var(--text-main) * 22);
+      padding-bottom: calc(var(--text-main) * 13.125);
+      @media (width < 62rem) {
+        padding-top: calc(var(--text-main) * 14);
+        padding-bottom: calc(var(--text-main) * 8);
+      }
+      @media (width < 48rem) {
+        padding-top: calc(var(--text-main) * 10);
+        padding-bottom: calc(var(--text-main) * 6);
+      }
+    }
+
+    .about-card_wrap {
+      position: relative;
+      width: 90%;
+      max-width: 67.125rem;
+      margin-inline: auto;
+      padding: 3em 7.15em 7.5em;
+      background-color: var(--light-50);
+      color: var(--dark-900);
+      box-shadow: 0 4px 17px 25px rgb(0 0 0 / 15%);
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: var(--_pattern);
+        background-size: cover;
+        mix-blend-mode: overlay;
+        opacity: 0.7;
+        pointer-events: none;
+      }
+      @media (width < 62rem) {
+        padding-inline: 4.05em;
+        padding-bottom: 5.5em;
+      }
+      @media (width < 48rem) {
+        padding-inline: 2.25em;
+        padding-bottom: 4em;
+      }
+      @media (width < 30rem) {
+        padding-inline: 1.45em;
+      }
+    }
+
+    .about-card_top {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25em;
+      padding-bottom: 4em;
+      text-align: center;
+    }
+
+    .about-card_title {
+      text-wrap: wrap;
+      color: var(--dark-900);
+    }
+
+    .about-card_body {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5em;
+    }
+
+    .about-card_chapter_title {
+      margin-bottom: 1em;
+      font-weight: var(--primary-medium);
+    }
+
+    .about-card_people {
+      display: contents;
+      @media (width < 62rem) {
+        position: relative;
+        z-index: 3;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1em;
+        padding-top: 3em;
+      }
+      @media (width < 30rem) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .about-polaroid {
+      position: absolute;
+      z-index: 3;
+      width: 30%;
+      margin: 0;
+      padding: 1em;
+      background-color: var(--light-100);
+      box-shadow: 0 7px 17px rgb(0 0 0 / 25%);
+      transform: rotate(-5.23deg);
+      @media (width < 62rem) {
+        position: relative;
+        width: 100%;
+        margin: 0;
+        transform: none;
+      }
+    }
+
+    .about-polaroid_victoria {
+      inset: 0 auto auto 0;
+      margin-top: 18%;
+      margin-left: -21%;
+    }
+
+    .about-polaroid_mark {
+      inset: 0 0 auto auto;
+      margin-top: 41%;
+      margin-right: -21%;
+      transform: rotate(5.23deg);
+    }
+
+    .about-polaroid_bradley {
+      inset: auto auto 0 0;
+      margin-bottom: -10%;
+      margin-left: -21%;
+    }
+
+    @media (width < 62rem) {
+      .about-polaroid_victoria,
+      .about-polaroid_mark,
+      .about-polaroid_bradley {
+        inset: auto;
+        margin: 0;
+      }
+    }
+
+    .about-polaroid_crop {
+      position: relative;
+      overflow: clip;
+      aspect-ratio: 286 / 355;
+      width: 100%;
+    }
+
+    .about-polaroid_img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .about-polaroid_name {
+      display: block;
+      width: 100%;
+      max-width: 6.875em;
+      margin: 0.5em auto 0;
+      color: var(--dark-900);
+    }
+
+    .about-polaroid_mark .about-polaroid_name {
+      max-width: 5.25em;
+    }
+
+    .about-polaroid_bradley .about-polaroid_name {
+      max-width: 7.1em;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Unlayered: these share an element with the library's trimmed text boxes. */
+  .about-card_chapter_text,
+  .about-card_chapter_title {
+    text-box: normal;
+  }
+</style>

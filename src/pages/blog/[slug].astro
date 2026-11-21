@@ -1,0 +1,385 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import Overlay from "@/components/media/Overlay.astro";
+import Ornament from "@/components/content/Ornament.astro";
+import leaf from "@/assets/images/blog/post-leaf.avif";
+import edge from "@/assets/images/blog/post-edge.avif";
+import clock from "@/assets/icons/clock.svg";
+import { getPost, formatPostDate, formatReadingTime } from "@/utils/blog.ts";
+import { portableTextToHtml } from "@/utils/portable-text.ts";
+
+// Posts are read from Sanity on every request, so edits show up without a rebuild.
+export const prerender = false;
+
+const post = await getPost(Astro.params.slug ?? "");
+if (!post) return new Response("Post not found", { status: 404 });
+
+const { title, publishedAt, readingTime, excerpt, imageUrl, imageAlt, intro } = post;
+// Sanity returns null (not undefined) for an empty list.
+const sideImages = post.sideImages ?? [];
+// Sanity serves resized, modern-format copies when asked; the article images never need more than ~1200px.
+const bodyHtml = portableTextToHtml((post.body ?? []) as never).replace(
+  /(src="https:\/\/cdn\.sanity\.io\/[^"?]+)"/g,
+  '$1?auto=format&w=1200"',
+);
+---
+
+<Layout
+  theme="light"
+  type="article"
+  title={post.seoTitle || title}
+  description={post.seoDescription || excerpt}
+  image={post.ogImageUrl || imageUrl}
+  imageAlt={imageAlt}
+  noindex={post.noindex || undefined}
+>
+  <!-- hero -->
+  <Section theme="dark" class="post-hero_wrap" containerClass="post-hero_contain" paddingTop="small" paddingBottom="none" style="padding-bottom: calc(var(--text-main) * 10);">
+    <Fragment slot="background">
+      <div class="post-hero_bg">
+        {imageUrl && <Img class="height-full" src={`${imageUrl}?auto=format`} width={1728} height={940} loading="eager" fetchPriority="high" alt="" />}
+        <Overlay strength={25} />
+        <div class="post-hero_edge" style={`--_edge: url('${edge.src}');`}></div>
+      </div>
+    </Fragment>
+    <div class="post-hero_text">
+      <div class="post-hero_meta">
+        <time class="post-hero_date text-style-main" datetime={publishedAt}>{formatPostDate(publishedAt)}</time>
+        {readingTime && (
+          <>
+            <span class="post-hero_sep" aria-hidden="true"></span>
+            <span class="post-hero_time text-style-main">
+              <span class="post-hero_clock"><Icon src={clock} variant="full-width" /></span>
+              {formatReadingTime(readingTime)}
+            </span>
+          </>
+        )}
+      </div>
+      <Heading tag="h1" variant="h1" class="post-hero_title margin-top-0 margin-bottom-5">{title}</Heading>
+      {excerpt && <p class="post-hero_excerpt text-style-main">{excerpt}</p>}
+    </div>
+  </Section>
+
+  <!-- article -->
+  <Section theme="light" class="post-body_wrap" containerClass="post-body_contain" paddingTop="small" paddingBottom="small">
+    <Fragment slot="background">
+      <Img class="post-body_leaf" src={leaf} width={854} transparent loading="lazy" alt="" />
+    </Fragment>
+    <div class="post-body_flex">
+      <div class="post-body_left">
+        <div>
+          {intro?.eyebrow && <Eyebrow class="margin-bottom-3">{intro.eyebrow}</Eyebrow>}
+          {intro?.heading && <Heading tag="h2" variant="h2" class="post-body_heading margin-top-0 margin-bottom-4">{intro.heading}</Heading>}
+          <Ornament class="post-body_ornament" />
+          {intro?.text && <p class="post-body_intro text-style-main">{intro.text}</p>}
+        </div>
+        {sideImages.length > 0 && (
+          <div class="post-body_photos">
+            <div class="post-body_photo">
+              <Img class="post-body_photo_img" src={`${sideImages[0].url}?auto=format`} width={600} height={800} alt={sideImages[0].alt} />
+            </div>
+            {sideImages[1] && (
+              <div class="post-body_photo post-body_photo_back">
+                <Img class="post-body_photo_img" src={`${sideImages[1].url}?auto=format`} width={600} height={800} alt={sideImages[1].alt} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <div class="post-body_right">
+        <div class="post-body_rich" set:html={bodyHtml} />
+      </div>
+    </div>
+  </Section>
+</Layout>
+
+<style is:global>
+  @layer components {
+    .post-hero_wrap {
+      justify-content: flex-end;
+      min-height: calc(100dvh - var(--nav-height));
+    }
+
+    .post-hero_bg {
+      position: absolute;
+      inset: 0;
+      overflow: clip;
+      pointer-events: none;
+    }
+
+    /* The torn-paper edge that joins the photo to the article below. */
+    .post-hero_edge {
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      height: 6.25rem;
+      background-image: var(--_edge);
+      background-repeat: repeat-x;
+      background-position: 50% 0;
+      background-size: auto 100%;
+    }
+
+    .post-hero_contain {
+      position: relative;
+      z-index: 3;
+    }
+
+    .post-hero_text {
+      max-width: 53rem;
+    }
+
+    .post-hero_meta {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+    }
+
+    .post-hero_date,
+    .post-hero_time {
+      text-transform: uppercase;
+    }
+
+    .post-hero_sep {
+      flex: none;
+      width: 1px;
+      height: 1em;
+      background-color: currentColor;
+    }
+
+    .post-hero_time {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .post-hero_clock {
+      flex: none;
+      width: 1.25em;
+    }
+
+    .post-hero_title {
+      text-wrap: wrap;
+    }
+
+    .post-hero_excerpt {
+      max-width: 36.85rem;
+    }
+
+    .post-body_wrap {
+      overflow: clip;
+      background-color: transparent;
+      background-image: linear-gradient(#f5f3ef, var(--light-100));
+    }
+
+    .post-body_leaf {
+      position: absolute;
+      inset: auto auto 8% 0;
+      width: 40%;
+      height: auto;
+      aspect-ratio: 1 / 1.58;
+      pointer-events: none;
+    }
+
+    .post-body_contain {
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-body_flex {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      width: 100%;
+      @media (width < 48rem) {
+        flex-direction: column;
+      }
+    }
+
+    .post-body_left {
+      width: 100%;
+      max-width: 30.75rem;
+    }
+
+    .post-body_heading {
+      color: var(--dark-900);
+    }
+
+    .post-body_intro {
+      max-width: 25rem;
+      margin-top: 1.25rem;
+      color: var(--dark-700);
+    }
+
+    .post-body_photos {
+      position: relative;
+      margin-block: 3.5rem;
+      @media (width < 48rem) {
+        margin-block: 2.5rem 3rem;
+      }
+    }
+
+    .post-body_photo {
+      position: relative;
+      z-index: 3;
+      left: 3%;
+      width: 60%;
+      max-width: 18.25rem;
+      padding: 0.88rem;
+      background-color: var(--light-100);
+      box-shadow: 0 14px 36px rgb(0 0 0 / 12%);
+      transform: rotate(-5.44deg);
+    }
+
+    .post-body_photo_back {
+      position: absolute;
+      inset: auto 8% -8% auto;
+      z-index: 1;
+      left: auto;
+      width: 45%;
+      max-width: 13.75rem;
+      opacity: 0.5;
+      transform: rotate(10.4deg);
+    }
+
+    .post-body_photo_img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+
+    .post-body_right {
+      width: 100%;
+      max-width: 56.5rem;
+      padding-inline-start: 2rem;
+      border-inline-start: var(--border-width) solid #c8a77a;
+      @media (width >= 80rem) {
+        padding-inline-start: 3rem;
+      }
+      @media (width < 30rem) {
+        padding: 2rem 0 0;
+        border-inline-start: 0;
+        border-block-start: var(--border-width) solid #c8a77a;
+      }
+    }
+
+  }
+</style>
+
+<!-- Unlayered on purpose: Lumos resets heading and paragraph margins outside a layer, which would beat these. -->
+<style is:global>
+  .post-body_rich {
+      color: var(--dark-700);
+      text-wrap: pretty;
+
+      /* The live article keeps full line boxes; the site-wide trim would shrink every gap. */
+      p,
+      h2,
+      h3,
+      h4,
+      li {
+        text-box: normal;
+      }
+
+      > :first-child {
+        margin-top: 0;
+      }
+      p,
+      ul,
+      ol {
+        margin-bottom: 1em;
+      }
+      h2,
+      h3,
+      h4 {
+        margin-top: 1em;
+        font-family: var(--h2-font-family);
+        font-weight: 400;
+        color: var(--dark-900);
+        text-wrap: wrap;
+      }
+      h2 {
+        margin-bottom: 0.2em;
+        font-size: var(--h2);
+        line-height: var(--h2-line-height);
+        letter-spacing: var(--h2-letter-spacing);
+      }
+      h3 {
+        margin-bottom: 0.3em;
+        font-size: var(--h3);
+        line-height: var(--h3-line-height);
+        letter-spacing: var(--h3-letter-spacing);
+      }
+      h4 {
+        margin-bottom: 0.3em;
+        font-size: var(--h4);
+        line-height: var(--h4-line-height);
+        letter-spacing: var(--h4-letter-spacing);
+      }
+      ul,
+      ol {
+        padding-inline-start: 2.2em;
+      }
+      ul {
+        list-style: disc;
+      }
+      ol {
+        list-style: decimal;
+      }
+      li {
+        margin-bottom: 0.3em;
+      }
+      a {
+        font-size: 0.85em;
+        text-decoration: none;
+        white-space: nowrap;
+        color: var(--brand-500);
+        @media (hover: hover) {
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+      figure {
+        margin-block: 2.5rem;
+      }
+      figure img {
+        width: 100%;
+        height: auto;
+        border-radius: 0.75rem;
+        display: block;
+      }
+      figcaption {
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--dark-700);
+      }
+      .embed iframe {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 0;
+        border-radius: 0.75rem;
+      }
+      /* The call-to-action box at the end of a post. */
+      blockquote {
+        margin: 2.5rem 0 0;
+        padding: 1.5rem 1.75rem;
+        border-inline-start: 3px solid var(--brand-500);
+        border-radius: 0.5rem;
+        background-color: rgb(16 71 174 / 5%);
+        font-size: 1.0625rem;
+        line-height: 1.55;
+        font-style: italic;
+        color: var(--dark-900);
+      }
+    }
+</style>

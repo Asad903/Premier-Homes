@@ -9,8 +9,8 @@ const decode = (s) =>
     return entities[e.toLowerCase()] ?? m;
   });
 
-const block = (spans, style = "normal", listItem) => ({
-  _type: "block", _key: key(), style, markDefs: [], ...(listItem ? { listItem, level: 1 } : {}),
+const block = (spans, style = "normal", listItem, markDefs = []) => ({
+  _type: "block", _key: key(), style, markDefs, ...(listItem ? { listItem, level: 1 } : {}),
   children: spans.length ? spans : [{ _type: "span", _key: key(), text: "", marks: [] }],
 });
 
@@ -21,6 +21,8 @@ export function htmlToBlocks(input = "") {
   const out = [];
   let spans = [];
   let marks = [];
+  let defs = [];
+  let linkKey = "";
   let style = "normal";
   let list = "";
   const flush = () => {
@@ -29,9 +31,12 @@ export function htmlToBlocks(input = "") {
       const trimmed = spans.map((s) => ({ ...s }));
       trimmed[0].text = trimmed[0].text.replace(/^\s+/, "");
       trimmed.at(-1).text = trimmed.at(-1).text.replace(/\s+$/, "");
-      out.push(block(trimmed.filter((s) => s.text), style, list === "ol" ? "number" : list === "ul" ? "bullet" : undefined));
+      const kept = trimmed.filter((s) => s.text);
+      const used = defs.filter((d) => kept.some((k) => k.marks.includes(d._key)));
+      out.push(block(kept, style, list === "ol" ? "number" : list === "ul" ? "bullet" : undefined, used));
     }
     spans = [];
+    defs = [];
   };
   const toggle = (mark, on) => { marks = on ? [...new Set([...marks, mark])] : marks.filter((m) => m !== mark); };
   for (const token of input.replace(/\r/g, "").split(/(<[^>]+>)/)) {
@@ -48,6 +53,20 @@ export function htmlToBlocks(input = "") {
     else if (name === "strong" || name === "b") toggle("strong", open);
     else if (name === "em" || name === "i") toggle("em", open);
     else if (name === "u") toggle("underline", open);
+    else if (name === "a") {
+      if (open) {
+        const href = decode(token.match(/href\s*=\s*"([^"]*)"/i)?.[1] ?? "");
+        if (href) {
+          const def = { _type: "link", _key: key(), href };
+          defs.push(def);
+          linkKey = def._key;
+          toggle(def._key, true);
+        }
+      } else if (linkKey) {
+        toggle(linkKey, false);
+        linkKey = "";
+      }
+    }
     else if (name === "ul" || name === "ol") { flush(); list = open ? name : ""; }
     else if (["p", "li", "h1", "h2", "h3", "h4", "div", "blockquote"].includes(name)) {
       flush();

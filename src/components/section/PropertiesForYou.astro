@@ -1,0 +1,34 @@
+---
+import type { ComponentProps } from "astro/types";
+import Section from "@/components/wrapper/Section.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import PropertyCard from "@/components/item/PropertyCard.astro";
+import { getFeaturedProperties } from "@/utils/properties.ts";
+
+type Props = Pick<ComponentProps<typeof Section>, "render"> & {
+  /** Section heading. */
+  heading?: string;
+};
+
+const { render = true, heading = "Properties For You" } = Astro.props;
+const items = render ? await getFeaturedProperties(3) : [];
+---
+
+{render && items.length > 0 && (
+  <Section paddingTop="small" paddingBottom="small">
+    <h2 class="properties-for-you_title text-style-h5">{heading}</h2>
+    <Grid medium={2} large={3}>
+      {items.map((item) => <PropertyCard item={item} />)}
+    </Grid>
+  </Section>
+)}
+
+<style is:global>
+  @layer components {
+    .properties-for-you_title {
+      font-family: var(--primary-family);
+      font-weight: var(--primary-medium);
+      color: var(--dark-900);
+    }
+  }
+</style>

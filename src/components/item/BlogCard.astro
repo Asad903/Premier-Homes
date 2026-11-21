@@ -1,0 +1,161 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import clock from "@/assets/icons/clock.svg";
+import { formatPostDate, formatReadingTime, type PostCardData } from "@/utils/blog.ts";
+
+type Props = HTMLAttributes<"article"> & {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Post to show. */
+  item: PostCardData;
+};
+
+const { render = true, item, class: className, ...rest } = Astro.props;
+const { title, slug, publishedAt, readingTime, excerpt, imageUrl, imageAlt, category } = item;
+---
+
+{render && (
+  <article class:list={["blog-card_wrap", className]} {...rest}>
+    <a class="blog-card_link" href={`/blog/${slug}`}>
+      <div>
+        <div class="blog-card_media">
+          {imageUrl && <Img class="blog-card_img" src={`${imageUrl}?auto=format`} width={720} height={533} alt={imageAlt} />}
+          {category && <span class="blog-card_tag">{category.title}</span>}
+        </div>
+        <div class="blog-card_body">
+          <div class="blog-card_row">
+            <time class="blog-card_date text-style-small" datetime={publishedAt}>{formatPostDate(publishedAt)}</time>
+            {readingTime && (
+              <span class="blog-card_time text-style-small">
+                <span class="blog-card_clock"><Icon src={clock} variant="full-width" /></span>
+                {formatReadingTime(readingTime)}
+              </span>
+            )}
+          </div>
+          <h3 class="blog-card_title text-style-h5 margin-bottom-4">{title}</h3>
+          {excerpt && <p class="blog-card_excerpt">{excerpt}</p>}
+        </div>
+      </div>
+      <span class="blog-card_more text-style-main">
+        Read more
+        <span class="blog-card_arrow"><Icon src={arrow} variant="full-width" /></span>
+      </span>
+    </a>
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    .blog-card_wrap {
+      width: 100%;
+      height: 100%;
+      border: var(--border-width) solid var(--light-300);
+    }
+
+    .blog-card_link {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 2.5rem;
+      height: 100%;
+      padding-bottom: 1.25rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .blog-card_media {
+      position: relative;
+      overflow: clip;
+      aspect-ratio: 1.35;
+      background-color: var(--background-2);
+    }
+
+    .blog-card_img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      .blog-card_link:hover & {
+        transform: scale(1.05);
+      }
+    }
+
+    .blog-card_tag {
+      position: absolute;
+      inset: 1rem auto auto 1rem;
+      z-index: 1;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.63rem;
+      line-height: 1.5;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--light-100);
+      background-color: rgb(0 0 0 / 75%);
+    }
+
+    .blog-card_body,
+    .blog-card_more {
+      padding-inline: 1.25rem;
+    }
+
+    .blog-card_body {
+      padding-top: 1.25rem;
+    }
+
+    .blog-card_row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .blog-card_date {
+      font-weight: var(--primary-medium);
+      color: var(--brand-500);
+    }
+
+    .blog-card_time {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: var(--primary-medium);
+      text-transform: uppercase;
+      color: var(--dark-700);
+    }
+
+    .blog-card_clock {
+      flex: none;
+      width: 1.25em;
+    }
+
+    .blog-card_title {
+      color: var(--dark-900);
+    }
+
+    .blog-card_excerpt {
+      color: var(--dark-700);
+    }
+
+    .blog-card_more {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--brand-500);
+      transition: color 0.2s ease;
+      .blog-card_link:hover & {
+        color: var(--dark-900);
+      }
+    }
+
+    .blog-card_arrow {
+      flex: none;
+      width: 1rem;
+    }
+  }
+</style>

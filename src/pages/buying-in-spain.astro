@@ -1,0 +1,187 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Overlay from "@/components/media/Overlay.astro";
+import TileBand from "@/components/content/TileBand.astro";
+import PropertiesForYou from "@/components/section/PropertiesForYou.astro";
+import Faq from "@/components/section/Faq.astro";
+import hero from "@/assets/images/buying/hero.avif";
+import prices from "@/assets/images/buying/prices-fees.avif";
+import deposits from "@/assets/images/buying/deposits.avif";
+import legal from "@/assets/images/buying/legal-info.avif";
+import banks from "@/assets/images/buying/banks.avif";
+import completion from "@/assets/images/buying/completion.avif";
+import running from "@/assets/images/buying/running-costs.avif";
+
+// The guide is static copy, but the property strip reads Sanity, so the page renders on demand.
+export const prerender = false;
+
+// Illustration widths from the live site, in rem.
+const topics = [
+  {
+    title: "Prices & Fees",
+    image: prices,
+    alt: "Prices and fees",
+    width: 24.8,
+    body: `
+      <p>All prices shown on the site exclude taxes and legal costs. On top of the purchase price, buyers should budget for:</p>
+      <ul>
+        <li>Either 8% ITP (property transfer tax) on a resale property, or 10% IVA (VAT) on a new-build/off-plan property that has never been owned before</li>
+        <li>1-2% for land registry and notary costs</li>
+        <li>Solicitor/legal fees, typically €1,000-€1,500 plus VAT</li>
+        <li>1-2% stamp duty, applicable to new-build/off-plan properties</li>
+        <li>Possible extra costs at completion, such as the first year’s insurance or the first quarter’s community fees</li>
+        <li>If using a Spanish mortgage: additional set-up fees and life insurance</li>
+      </ul>
+      <p>Example cost breakdown for a €100,000 resale property:</p>
+      <ul>
+        <li>€100,000 – Agreed price</li>
+        <li>€8,000 – ITP</li>
+        <li>€1,700 – Land registry &amp; notary costs</li>
+        <li>€1,700 – Solicitor fees</li>
+        <li>€600 – Other associated costs</li>
+        <li>€112,000 – Approximate total</li>
+      </ul>
+      <p><strong>Note:</strong> ITP is a regional tax and applies to about 99% of properties on the site. If a property is brand new and sold directly by a developer, it’s taxed nationally instead — 10% IVA applies rather than 8% ITP.</p>`,
+  },
+  {
+    title: "Deposits",
+    image: deposits,
+    alt: "Deposits",
+    width: 24.8,
+    body: `<p>Most properties can be secured with an initial €5,000 reservation deposit, payable by credit or debit card, which takes the property off the market. A second deposit covering 10% of the total price is then due within 20 calendar days of the first. For example, on a €200,000 property, that means €5,000 upfront followed by €15,000 within 20 days. In cases where completion is scheduled within four weeks, the buyer’s and seller’s solicitors can instead agree to have the second deposit paid at completion.</p>`,
+  },
+  {
+    title: "Legal Info",
+    image: legal,
+    alt: "Legal information",
+    width: 20.75,
+    body: `<p>Foreign buyers need an NIE number (equivalent to a National Insurance number), which is issued by the local police station. Granting your solicitor Power of Attorney allows them to collect this certificate on your behalf. Independent legal representation is strongly recommended, and many local solicitors are multilingual, including English speakers. With Power of Attorney in place, a solicitor can also open a bank account and set up utilities — though they’ll only act once you’ve given written approval — meaning buyers don’t need to keep flying back to Spain throughout the process. Solicitor fees generally range from 1-1.5% of the purchase price, with a minimum of €1,000-€1,500.</p>`,
+  },
+  {
+    title: "Banks",
+    image: banks,
+    alt: "Banks",
+    width: 22.375,
+    body: `<p>A Spanish bank account is required to complete the purchase. Special offers, including free banking, are available through a partner bank in Murcia, though buyers remain free to choose whichever bank suits them. For those applying for a Spanish mortgage, help is available, and non-residents can generally expect to borrow 60-70% of the property’s value.</p>`,
+  },
+  {
+    title: "Completion",
+    image: completion,
+    alt: "Completion",
+    width: 23.75,
+    body: `<p>Completion typically takes up to 12 weeks from the date the initial reservation deposit is paid, with roughly two more weeks added if a Spanish mortgage is involved. With Power of Attorney granted to your solicitor, you don’t need to be physically present at completion. Once you have the keys, guidance is available on local key holders who can manage cleaning, laundry, and general maintenance, and ongoing support is available afterward for recommendations on upkeep services. For those looking to rent out their property, advice is available on holiday rentals along with introductions to the entities needed to secure a rental license.</p>`,
+  },
+  {
+    title: "Running Costs",
+    image: running,
+    alt: "Running costs",
+    width: 22.56,
+    body: `
+      <p>Approximate costs for an apartment:</p>
+      <p>Monthly:</p>
+      <ul>
+        <li>€120 – Community fees</li>
+        <li>€60 – Gas, electricity, and water</li>
+      </ul>
+      <p>Annual:</p>
+      <ul>
+        <li>€250 – Key holder fees</li>
+        <li>€250 – Council tax</li>
+        <li>€200 – Insurance</li>
+      </ul>
+      <p>Total for the year: €2,860. Community fees listed on the site are estimates only and may end up higher or lower; exact figures should be confirmed through your solicitor.</p>`,
+  },
+];
+---
+
+<Layout
+  theme="light"
+  title="Buying Property in Spain: Costs, Taxes & Process"
+  description="A clear guide to buying a home in Spain: deposits, taxes, legal fees, NIE numbers, bank accounts, mortgages and completion for international buyers."
+  imageAlt="Spanish coastal town lit up at dusk"
+>
+  <!-- hero -->
+  <Section theme="dark" paddingTop="large" paddingBottom="large">
+    <Fragment slot="background">
+      <Img class="height-full" src={hero} width={1728} loading="eager" fetchPriority="high" alt="Spanish coastal town lit up at dusk" />
+      <Overlay strength={20} />
+    </Fragment>
+    <ContentWrapper centered={true}>
+      <Heading tag="h1" variant="h1" maxWidth={22}>The Premier Guide to buying in Spain</Heading>
+    </ContentWrapper>
+  </Section>
+  <TileBand />
+
+  <!-- topics -->
+  {topics.map((topic, index) => (
+    <Section theme="light" paddingTop="medium" paddingBottom="medium" class:list={["buying_topic", index % 2 === 1 && "buying_topic-alt"]}>
+      <ContentWrapper variant="columns" reverse={index % 2 === 1} class="buying_columns">
+        <div class="buying_text">
+          <Heading tag="h2" variant="h2" class="margin-top-0 margin-bottom-4">{topic.title}</Heading>
+          <div class="buying_rich" set:html={topic.body} />
+        </div>
+        <div slot="column2" class="buying_visual">
+          <Img class="buying_img" src={topic.image} width={800} alt={topic.alt} transparent style={`max-width: ${topic.width}rem;`} />
+        </div>
+      </ContentWrapper>
+    </Section>
+  ))}
+
+  <PropertiesForYou />
+  <Faq />
+</Layout>
+
+<!-- Unlayered on purpose: Lumos resets paragraph and list margins outside a layer, which would beat these. -->
+<style is:global>
+  .buying_topic-alt {
+    background-color: var(--light-200);
+  }
+
+  .buying_columns {
+    align-items: center;
+  }
+
+  .buying_visual {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .buying_img {
+    width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  .buying_rich {
+    color: var(--dark-700);
+
+    p,
+    ul,
+    li {
+      text-box: normal;
+    }
+    p,
+    ul {
+      margin-bottom: 1em;
+    }
+    ul {
+      padding-inline-start: 2.2em;
+      list-style: disc;
+    }
+    li {
+      margin-bottom: 0.3em;
+    }
+    strong {
+      font-weight: var(--primary-semibold);
+      color: var(--dark-900);
+    }
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+</style>

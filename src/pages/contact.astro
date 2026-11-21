@@ -1,0 +1,142 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Overlay from "@/components/media/Overlay.astro";
+import Form from "@/components/form/Form.astro";
+import Input from "@/components/form/Input.astro";
+import Textarea from "@/components/form/Textarea.astro";
+import Button from "@/components/Button.astro";
+import Faq from "@/components/section/Faq.astro";
+import hero from "@/assets/images/contact/hero.avif";
+import edge from "@/assets/images/contact/edge.avif";
+---
+
+<Layout
+  theme="light"
+  title="Contact Premier Homes in Spain | Property Enquiries"
+  description="Get in touch about buying property in Murcia or Alicante. Tell us what you are looking for and we will send a tailored shortlist or arrange viewings."
+  imageAlt="Palm-lined seafront promenade in Alicante"
+>
+  <!-- hero and form -->
+  <Section theme="dark" class="contact-hero_wrap" containerClass="contact-hero_contain" paddingTop="small" paddingBottom="large">
+    <Fragment slot="background">
+      <div class="contact-hero_bg">
+        <Img class="height-full" src={hero} width={1728} loading="eager" fetchPriority="high" alt="Palm-lined seafront promenade in Alicante" />
+        <Overlay strength={25} />
+        <div class="contact-hero_edge" style={`--_edge: url('${edge.src}');`}></div>
+      </div>
+    </Fragment>
+    <div class="contact-hero_text">
+      <p class="contact-hero_eyebrow text-style-main">Contact Us</p>
+      <Heading tag="h1" variant="h2" class="contact-hero_title margin-top-0">Send us a message &amp; we will find you a home in Spain.</Heading>
+    </div>
+    <div class="contact-form_wrap theme-light">
+      <Form name="contact" successMessage="Thank you! Your submission has been received.">
+        <Input variant="first-name" name="first_name" label="First Name" required />
+        <Input variant="last-name" name="last_name" label="Last Name" required />
+        <Input variant="email" name="email" label="Email" required />
+        <Input variant="phone" name="phone" label="Phone (inc. country code)" placeholder="eg: +44 032 250 365" />
+        <Textarea name="message" label="Message" minLines={3} />
+        <Button type="submit" class="contact-form_submit">Submit</Button>
+        <p class="contact-form_note">
+          This form is protected by reCAPTCHA Enterprise and the Google
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a> and
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms of Service</a> apply.
+        </p>
+      </Form>
+    </div>
+  </Section>
+
+  <Faq />
+</Layout>
+
+<style is:global>
+  @layer components {
+    .contact-hero_wrap {
+      min-height: calc(100dvh - var(--nav-height));
+      justify-content: center;
+    }
+
+    .contact-hero_bg {
+      position: absolute;
+      inset: 0;
+      overflow: clip;
+      pointer-events: none;
+    }
+
+    /* The torn-paper edge at the foot of the photo, as on the live site. */
+    .contact-hero_edge {
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      height: 6.25rem;
+      background-image: var(--_edge);
+      background-repeat: repeat-x;
+      background-position: 50% 0;
+      background-size: auto 100%;
+    }
+
+    .contact-hero_contain {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-6);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .contact-hero_text {
+      max-width: 31rem;
+    }
+
+    .contact-hero_eyebrow {
+      margin-bottom: 1.25rem;
+      font-weight: var(--primary-bold);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+    }
+
+    .contact-hero_title {
+      text-wrap: wrap;
+    }
+
+    .contact-form_wrap {
+      width: 100%;
+      max-width: 36rem;
+      margin-inline-start: auto;
+      padding: 2rem;
+      border: var(--border-width) solid var(--light-300);
+      border-radius: 1rem;
+      background-color: var(--light-100);
+      color: var(--dark-700);
+      box-shadow: 0 4px 24px rgb(0 0 0 / 4%);
+      @media (width < 48rem) {
+        margin-inline-start: 0;
+      }
+    }
+
+    /* The form's default row gap suits a full page of fields; a compact card wants the live site's 1em. */
+    .contact-form_wrap .form_fields {
+      row-gap: 1rem;
+    }
+
+    .contact-form_submit {
+      width: 100%;
+    }
+
+    .contact-form_note {
+      font-size: 0.75rem;
+      line-height: 1.5;
+      font-weight: var(--primary-regular);
+      a {
+        color: #0284c7;
+        text-decoration: underline;
+      }
+    }
+  }
+</style>

@@ -18,6 +18,29 @@ import ExploreVideo from "@/components/section/ExploreVideo.astro";
 import ViewingTrip from "@/components/section/ViewingTrip.astro";
 import BannerHome from "@/components/section/BannerHome.astro";
 import FeaturesHome from "@/components/section/FeaturesHome.astro";
+import Button from "@/components/Button.astro";
+import Img from "@/components/media/Img.astro";
+import Slider from "@/components/interactive/Slider.astro";
+import Tabs from "@/components/interactive/Tabs.astro";
+import TabLink from "@/components/interactive/TabLink.astro";
+import PropertyCard from "@/components/item/PropertyCard.astro";
+import { getFeaturedProperties } from "@/utils/properties.ts";
+import { getLatestPosts } from "@/utils/blog.ts";
+
+// Featured properties and the latest posts come from Sanity on every request, so edits show without a rebuild.
+export const prerender = false;
+
+const [properties, latestPosts, blogPosts, guidePosts] = await Promise.all([
+  getFeaturedProperties(6),
+  getLatestPosts({ limit: 8 }),
+  getLatestPosts({ category: "blog", limit: 8 }),
+  getLatestPosts({ category: "guide", limit: 8 }),
+]);
+const blogTabs = [
+  { label: "All", posts: latestPosts },
+  { label: "Blogs", posts: blogPosts },
+  { label: "Guides", posts: guidePosts },
+].filter((tab) => tab.posts.length > 0);
 
 const avatars = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/images/reviews/*",
@@ -51,6 +74,21 @@ const schema = {
   <!-- hero -->
   <HeroHome />
   <TileBand />
+  <!-- featured properties -->
+  {properties.length > 0 && (
+    <Section paddingTop="small" paddingBottom="small">
+      <div class="home-properties_head">
+        <div class="home-properties_intro">
+          <Eyebrow class="margin-bottom-4">Featured</Eyebrow>
+          <Heading tag="h2" variant="h3" class="margin-top-0">Properties we love</Heading>
+        </div>
+        <Button element="link" emphasis="secondary" href="/listing">Show all properties</Button>
+      </div>
+      <Grid medium={2} large={3}>
+        {properties.map((item) => <PropertyCard item={item} />)}
+      </Grid>
+    </Section>
+  )}
   <!-- explore -->
   <Section paddingBottom="small">
     <ContentWrapper variant="auto-width" class="align-items-start">
@@ -120,12 +158,165 @@ const schema = {
       ))}
     </Grid>
   </Section>
+  <!-- blogs and guides -->
+  {blogTabs.length > 0 && (
+    <Section class="home-blog_wrap" containerClass="home-blog_contain" paddingTop="small" paddingBottom="small">
+      <div class="home-blog_intro">
+        <Eyebrow class="margin-bottom-4">Explore Murcia &amp; Alicante</Eyebrow>
+        <Heading tag="h2" variant="h3" class="margin-top-0 margin-bottom-4">Blogs &amp; Guides</Heading>
+        <p class="home-blog_text text-style-small">
+          Discover all the latest updates, insights and valuable resources right here. This hub provides blog, detailed guides to keep you up to date.
+        </p>
+      </div>
+      <Tabs class="home-blog_tabs">
+        <Fragment slot="links">
+          {blogTabs.map((tab) => <TabLink>{tab.label}</TabLink>)}
+        </Fragment>
+        {blogTabs.map((tab) => (
+          <div class="home-blog_panel">
+          <Slider label={`${tab.label} articles`} variant="contained" xsmall={1.2} small={1.6} medium={2.2} large={3.2}>
+            {tab.posts.map((post) => (
+              <a class="home-blog_card" href={`/blog/${post.slug}`}>
+                <div class="home-blog_img_wrap">
+                  {post.imageUrl && <Img class="home-blog_img" src={`${post.imageUrl}?auto=format`} width={900} height={1000} alt={post.imageAlt} />}
+                </div>
+                <p class="home-blog_tag text-style-main">{post.category?.title}</p>
+                <h3 class="home-blog_title text-style-h6">{post.title}</h3>
+              </a>
+            ))}
+          </Slider>
+          </div>
+        ))}
+      </Tabs>
+    </Section>
+  )}
   <!-- faq -->
   <Faq />
 </Layout>
 
 <style is:global>
   @layer components {
+    .home-properties_head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      width: 100%;
+    }
+
+    /* Heading on the left, category pills on the right, slider underneath. The tabs wrapper
+       steps aside (display: contents) so its bar and panels can sit in this grid. */
+    .container.home-blog_contain {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "intro" "bar" "panels";
+      align-items: end;
+      gap: var(--space-4) var(--space-6);
+      @media (width >= 48rem) {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "intro bar" "panels panels";
+        gap: var(--space-7) var(--space-6);
+      }
+    }
+
+    .home-blog_panel {
+      min-width: 0;
+    }
+
+    .home-blog_intro {
+      grid-area: intro;
+    }
+
+    .home-blog_text {
+      max-width: 22rem;
+      color: var(--dark-700);
+    }
+
+    .home-blog_tabs {
+      display: contents;
+    }
+
+    .home-blog_wrap .tabs_bar {
+      grid-area: bar;
+    }
+
+    .home-blog_wrap .tabs_panels {
+      grid-area: panels;
+    }
+
+    .home-blog_wrap .tabs_links {
+      gap: 0.75rem;
+    }
+
+    .home-blog_wrap .tabs_link {
+      flex: none;
+      min-width: 0;
+      padding: 0.625rem 1.25rem;
+      border: var(--border-width) solid var(--light-300);
+      border-radius: var(--radius-small);
+      color: var(--dark-700);
+      &.is-active {
+        border-color: var(--brand-500);
+        color: var(--brand-500);
+      }
+    }
+
+    .home-blog_wrap .slider_markers {
+      display: none;
+    }
+
+    .home-blog_wrap .slider_controls {
+      justify-content: flex-end;
+    }
+
+    .home-blog_card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* The first card is shown tall; the others grow on hover, as on the live site. */
+    .home-blog_img_wrap {
+      overflow: clip;
+      height: 32rem;
+      max-height: 24rem;
+      background-color: var(--background-2);
+      transition: max-height 0.5s ease;
+      .slider_list > :first-child &,
+      .home-blog_card:hover & {
+        max-height: 32rem;
+      }
+      .slider_list:hover > :first-child:not(:hover) & {
+        max-height: 24rem;
+      }
+    }
+
+    .home-blog_img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .home-blog_tag,
+    .home-blog_title {
+      text-box: normal;
+    }
+
+    .home-blog_tag {
+      margin-block: 1rem 0.5rem;
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--brand-500);
+    }
+
+    .home-blog_title {
+      line-height: 1.3;
+      color: var(--dark-900);
+      text-wrap: wrap;
+    }
+
     .reviews_rating {
       display: flex;
       flex-wrap: wrap;

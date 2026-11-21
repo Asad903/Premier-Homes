@@ -1,0 +1,561 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Img from "@/components/media/Img.astro";
+import Icon from "@/components/media/Icon.astro";
+import Button from "@/components/Button.astro";
+import Ornament from "@/components/content/Ornament.astro";
+import Form from "@/components/form/Form.astro";
+import Input from "@/components/form/Input.astro";
+import BlogCard from "@/components/item/BlogCard.astro";
+import hero from "@/assets/images/blog/hero.avif";
+import newsletter from "@/assets/images/blog/newsletter.avif";
+import arrow from "@/assets/icons/arrow-full.svg";
+import chevron from "@/assets/icons/chevron-down.svg";
+import lock from "@/assets/icons/lock.svg";
+import { BLOG_PAGE_SIZE, getBlogCategories, getFeaturedPost, getPosts } from "@/utils/blog.ts";
+
+// The category filter and "Load more" live in the URL and run as Sanity (GROQ) queries on the server.
+export const prerender = false;
+
+const params = Astro.url.searchParams;
+const categories = await getBlogCategories();
+const requested = params.get("category") ?? "";
+const active = categories.find((c) => c.slug === requested);
+const page = Math.max(1, parseInt(params.get("page") ?? "", 10) || 1);
+const [featured, { items, total, pages }] = await Promise.all([
+  getFeaturedPost(),
+  getPosts({ category: active?.slug ?? "", page }),
+]);
+
+const filterHref = (slug?: string) => (slug ? `/blog?category=${slug}` : "/blog");
+const options = [{ title: "All Articles", slug: "" }, ...categories].filter((o) => o.slug !== (active?.slug ?? ""));
+const moreHref = `/blog?${new URLSearchParams({ ...(active ? { category: active.slug } : {}), page: String(page + 1) })}`;
+const hasMore = page < pages;
+const first = total === 0 ? 0 : (page - 1) * BLOG_PAGE_SIZE + 1;
+const last = Math.min(page * BLOG_PAGE_SIZE, total);
+---
+
+<Layout
+  theme="light"
+  title="Living in Murcia & Alicante: Guides & Advice"
+  description="Guides to life on Spain's Costa Cálida and Costa Blanca: towns, beaches, golf, food and practical advice for moving to Spain."
+  imageAlt="Spanish coastline with a church tower above the sea"
+>
+  <!-- hero -->
+  <Section theme="light" class="blog-hero_wrap" containerClass="blog-hero_contain" paddingTop="small" paddingBottom="small">
+    <Fragment slot="background">
+      <div class="blog-hero_bg">
+        <Img class="height-full" src={hero} width={1728} loading="eager" fetchPriority="high" alt="" />
+        <div class="blog-hero_fade"></div>
+      </div>
+    </Fragment>
+    <div class="blog-hero_text">
+      <Heading tag="h1" variant="h1" class="blog-hero_title margin-top-0 margin-bottom-5">Stories, Guides &amp;<br />Local Advice for Life in Spain</Heading>
+      <p class="blog-hero_intro text-style-main">
+        Inspiring stories, expert guides, and local knowledge to help you buy, move, and thrive in Murcia &amp; Alicante.
+      </p>
+    </div>
+    {featured && (
+      <a class="blog-featured_wrap" href={`/blog/${featured.slug}`}>
+        <div class="blog-featured_media">
+          {featured.imageUrl && <Img class="blog-featured_img" src={`${featured.imageUrl}?auto=format`} width={800} height={800} loading="eager" alt={featured.imageAlt} />}
+        </div>
+        <div class="blog-featured_content">
+          {featured.category && <p class="blog-featured_tag text-style-main">{featured.category.title}</p>}
+          <h2 class="blog-featured_title text-style-h4">{featured.title}</h2>
+          <Ornament />
+          {featured.excerpt && <p class="blog-featured_text text-style-main">{featured.excerpt}</p>}
+          <span class="blog-featured_more text-style-main">
+            Read more
+            <span class="blog-featured_arrow"><Icon src={arrow} variant="full-width" /></span>
+          </span>
+        </div>
+      </a>
+    )}
+  </Section>
+
+  <!-- articles -->
+  <Section theme="light" paddingTop="small" paddingBottom="medium">
+    <div class="blog-list_head" data-blog-head>
+      <div class="blog-list_intro">
+        <Eyebrow class="margin-bottom-3">{active ? active.title : "Featured articles"}</Eyebrow>
+        <Heading tag="h2" variant="h3" class="blog-list_title margin-top-0">Stories about homes, lifestyle, and living in Spain.</Heading>
+      </div>
+      <details class="blog-filter_wrap" data-blog-filter>
+        <summary class="blog-filter_toggle button_wrap secondary">
+          <span>{active ? active.title : "All Articles"}</span>
+          <span class="blog-filter_icon"><Icon src={chevron} variant="small" /></span>
+        </summary>
+        <ul class="blog-filter_menu">
+          {options.map((option) => (
+            <li><a class="blog-filter_link text-style-main" href={filterHref(option.slug)}>{option.title}</a></li>
+          ))}
+        </ul>
+      </details>
+    </div>
+
+    <p class="blog-list_count text-style-small" data-total={total} aria-live="polite">
+      {total === 0 ? "No articles match this category yet." : `Showing ${first}–${last} of ${total} ${total === 1 ? "article" : "articles"}`}
+    </p>
+
+    <div class="blog-list_results">
+      {items.length > 0 && (
+        <Grid medium={2} large={3} class="blog-list_grid">
+          {items.map((item) => <BlogCard item={item} />)}
+        </Grid>
+      )}
+    </div>
+
+    <div class="blog-list_more">
+      {hasMore && <Button element="link" emphasis="secondary" href={moreHref}>Load more</Button>}
+    </div>
+  </Section>
+
+  <!-- newsletter -->
+  <Section theme="light" class="blog-news_wrap" paddingTop="medium" paddingBottom="medium" style={`--_bg: url('${newsletter.src}');`}>
+    <div class="blog-news_card">
+      <Ornament />
+      <Eyebrow>Premier Homes Journal</Eyebrow>
+      <div class="blog-news_text">
+        <Heading tag="h2" variant="h2" class="blog-news_title margin-top-0">Stay close to life in Spain</Heading>
+        <div class="blog-news_line" aria-hidden="true"></div>
+        <p class="blog-news_copy text-style-large">
+          Subscribe for property insights, area guides and local stories from Murcia &amp; Alicante, delivered with a personal touch.
+        </p>
+      </div>
+      <Form name="blog-newsletter" class="blog-news_form" successMessage="Thank you! Your submission has been received.">
+        <Input variant="email" name="email" label="Email" placeholder="Your email address" labelHidden required />
+        <button class="button_wrap blog-news_submit" type="submit">
+          <span class="button_text text-style-trim">Submit</span>
+          <span class="blog-news_arrow"><Icon src={arrow} variant="full-width" /></span>
+        </button>
+      </Form>
+      <p class="blog-news_note text-style-main">
+        <span class="blog-news_lock"><Icon src={lock} variant="full-width" /></span>
+        No spam. Thoughtful updates only.
+      </p>
+    </div>
+  </Section>
+</Layout>
+
+<script>
+  // Like the property listing: choosing a category swaps the results in place and updates the URL,
+  // and Load more appends the next page. The server still does the filtering (a Sanity GROQ query).
+  // Without JavaScript the category menu and Load more are plain links.
+  const head = document.querySelector<HTMLElement>("[data-blog-head]");
+  const results = document.querySelector<HTMLElement>(".blog-list_results");
+  const moreBox = document.querySelector<HTMLElement>(".blog-list_more");
+  const count = document.querySelector<HTMLElement>(".blog-list_count");
+
+  if (head && results && moreBox && count) {
+    const cache = new Map<string, Document>();
+    let controller: AbortController | undefined;
+
+    const menu = () => document.querySelector<HTMLDetailsElement>("[data-blog-filter]");
+    const grid = () => results.querySelector<HTMLElement>(".grid");
+    const cardCount = () => results.querySelectorAll(".blog-card_wrap").length;
+    const moreLink = () => moreBox.querySelector<HTMLAnchorElement>("a");
+    const adopt = (from: Element, into: Element) =>
+      into.replaceChildren(...[...from.childNodes].map((node) => document.importNode(node, true)));
+
+    const load = async (url: string, signal?: AbortSignal) => {
+      const cached = cache.get(url);
+      if (cached) return cached;
+      const response = await fetch(url, { headers: { Accept: "text/html" }, signal });
+      if (!response.ok) throw new Error(String(response.status));
+      const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+      cache.set(url, doc);
+      return doc;
+    };
+
+    // Fetch the next page quietly so Load more feels instant.
+    const prefetch = () => {
+      const href = moreLink()?.href;
+      if (!href || cache.has(href)) return;
+      const run = () => load(href).catch(() => {});
+      "requestIdleCallback" in window ? requestIdleCallback(run) : setTimeout(run, 400);
+    };
+
+    const showMore = (doc: Document) => {
+      const next = doc.querySelector(".blog-list_more");
+      if (next) adopt(next, moreBox);
+      prefetch();
+    };
+
+    const applyCategory = async (url: string) => {
+      controller?.abort();
+      controller = new AbortController();
+      results.classList.add("is-loading");
+      results.setAttribute("aria-busy", "true");
+      try {
+        const doc = await load(url, controller.signal);
+        const incoming = (selector: string) => doc.querySelector(selector);
+        const newHead = incoming("[data-blog-head]");
+        const newResults = incoming(".blog-list_results");
+        if (newHead) adopt(newHead, head);
+        if (newResults) adopt(newResults, results);
+        const shown = incoming(".blog-list_count");
+        count.textContent = shown?.textContent ?? "";
+        count.setAttribute("data-total", shown?.getAttribute("data-total") ?? "0");
+        showMore(doc);
+        history.replaceState(null, "", new URL(url, location.href).search || location.pathname);
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        count.textContent = "Couldn’t update the articles. Check your connection and try again.";
+      } finally {
+        results.classList.remove("is-loading");
+        results.removeAttribute("aria-busy");
+      }
+    };
+
+    // Category menu: pick an option, close the menu, swap the list.
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      const open = menu();
+      const link = (target as Element).closest?.<HTMLAnchorElement>(".blog-filter_link");
+      if (link && open?.contains(link)) {
+        event.preventDefault();
+        open.open = false;
+        applyCategory(link.href);
+        return;
+      }
+      if (open?.open && !open.contains(target)) open.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      const open = menu();
+      if (open?.open && event.key === "Escape") {
+        open.open = false;
+        open.querySelector<HTMLElement>("summary")?.focus();
+      }
+    });
+
+    let busy = false;
+    moreBox.addEventListener("click", async (event) => {
+      const link = (event.target as HTMLElement).closest("a");
+      if (!link || !moreBox.contains(link)) return;
+      event.preventDefault();
+      if (busy) return;
+      busy = true;
+      const label = link.textContent ?? "Load more";
+      if (!cache.has(link.href)) {
+        link.setAttribute("aria-disabled", "true");
+        link.textContent = "Loading…";
+      }
+      try {
+        const doc = await load(link.href);
+        const cards = [...doc.querySelectorAll(".blog-list_results .blog-card_wrap")];
+        const added = cards.map((card) => grid()?.appendChild(document.importNode(card, true)) as HTMLElement);
+        const total = count.getAttribute("data-total");
+        count.textContent = `Showing 1–${cardCount()} of ${total} ${total === "1" ? "article" : "articles"}`;
+        added[0]?.querySelector<HTMLElement>(".blog-card_link")?.focus({ preventScroll: true });
+        showMore(doc);
+      } catch {
+        link.textContent = "Couldn’t load more. Try again";
+        link.removeAttribute("aria-disabled");
+        window.setTimeout(() => (link.textContent = label), 3000);
+      } finally {
+        busy = false;
+      }
+    });
+
+    prefetch();
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    .blog-hero_wrap {
+      justify-content: flex-end;
+      min-height: calc(100dvh - var(--nav-height));
+      background-color: var(--background);
+    }
+
+    .blog-hero_bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: clip;
+      pointer-events: none;
+    }
+
+    /* A white wash on the left edge, as on the live site. */
+    .blog-hero_fade {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 12%;
+      background-image: linear-gradient(90deg, var(--light-100), transparent);
+    }
+
+    .blog-hero_contain {
+      position: relative;
+      z-index: 1;
+      gap: var(--space-6);
+    }
+
+    .blog-hero_text {
+      max-width: 53rem;
+    }
+
+    .blog-hero_title {
+      text-wrap: wrap;
+      color: var(--dark-900);
+    }
+
+    .blog-hero_intro {
+      max-width: 27rem;
+      color: var(--dark-700);
+    }
+
+    .blog-featured_wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.07fr;
+      width: 100%;
+      max-width: 53rem;
+      background-color: var(--light-100);
+      text-decoration: none;
+      color: inherit;
+      @media (width < 48rem) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .blog-featured_media {
+      position: relative;
+      overflow: clip;
+      min-height: 15rem;
+      background-color: var(--background-2);
+    }
+
+    .blog-featured_img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      .blog-featured_wrap:hover & {
+        transform: scale(1.05);
+      }
+    }
+
+    .blog-featured_content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 2rem;
+      @media (width < 30rem) {
+        padding: 1.3rem;
+      }
+    }
+
+    .blog-featured_tag {
+      font-weight: var(--primary-medium);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--brand-500);
+    }
+
+    .blog-featured_title {
+      color: var(--dark-900);
+      text-wrap: wrap;
+    }
+
+    .blog-featured_text {
+      color: var(--dark-700);
+    }
+
+    .blog-featured_more {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--brand-500);
+      transition: color 0.2s ease;
+      .blog-featured_wrap:hover & {
+        color: var(--dark-900);
+      }
+    }
+
+    .blog-featured_arrow {
+      flex: none;
+      width: 1rem;
+    }
+
+    .blog-list_head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      width: 100%;
+    }
+
+    .blog-list_intro {
+      max-width: 42rem;
+    }
+
+    .blog-list_title {
+      text-wrap: wrap;
+      color: var(--dark-900);
+    }
+
+    .blog-list_count {
+      width: 100%;
+      color: var(--dark-700);
+    }
+
+    .blog-list_results {
+      width: 100%;
+      transition: opacity 0.2s ease;
+      &.is-loading {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+    }
+
+    .blog-list_grid {
+      width: 100%;
+      gap: var(--space-7);
+    }
+
+    .blog-list_more:not(:has(*)) {
+      display: none;
+    }
+
+    .blog-list_more {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .blog-filter_wrap {
+      position: relative;
+      z-index: 5;
+      width: 10rem;
+    }
+
+    .blog-filter_toggle,
+    .blog-news_submit {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .blog-filter_toggle {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+      list-style: none;
+      cursor: pointer;
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    .blog-filter_icon {
+      display: flex;
+      flex: none;
+      transition: rotate var(--open-duration) var(--open-ease);
+      .blog-filter_wrap[open] & {
+        rotate: 180deg;
+      }
+    }
+
+    .blog-filter_menu {
+      position: absolute;
+      inset: calc(100% + 0.25rem) 0 auto;
+      overflow: clip;
+      border: var(--border-width) solid var(--brand-500);
+      border-radius: var(--radius-small);
+      background-color: var(--light-100);
+    }
+
+    .blog-filter_link {
+      display: block;
+      padding: 0.7rem 1rem;
+      color: var(--brand-500);
+      text-decoration: none;
+      @media (hover: hover) {
+        &:hover {
+          background-color: var(--light-300);
+        }
+      }
+    }
+
+    .blog-news_wrap {
+      background-image: var(--_bg);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      @media (width < 62rem) {
+        background-size: cover;
+      }
+    }
+
+    .blog-news_card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 41.125rem;
+      margin-inline: auto;
+      padding: 2.375rem;
+      border: var(--border-width) solid var(--light-300);
+      background-color: var(--light-100);
+      text-align: center;
+      @media (width < 30rem) {
+        padding: 1.375rem;
+      }
+    }
+
+    .blog-news_title {
+      text-wrap: wrap;
+      color: var(--dark-900);
+    }
+
+    .blog-news_line {
+      width: 2.375rem;
+      height: 1px;
+      margin: 1.25rem auto;
+      background-color: #c8a26b;
+    }
+
+    .blog-news_copy {
+      color: var(--dark-700);
+    }
+
+    .blog-news_form {
+      width: 100%;
+      text-align: start;
+    }
+
+    .blog-news_submit {
+      width: 100%;
+    }
+
+    .blog-news_arrow {
+      flex: none;
+      width: 1rem;
+    }
+
+    .blog-news_note {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--dark-900);
+    }
+
+    .blog-news_lock {
+      flex: none;
+      width: 1.25rem;
+    }
+  }
+</style>

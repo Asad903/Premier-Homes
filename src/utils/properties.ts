@@ -92,6 +92,21 @@ export async function getProperties(filters: PropertyFilters) {
   return { total, items, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
+/** Properties flagged "featured" in Studio, topped up with the newest active sales so the strip is never short. */
+export async function getFeaturedProperties(limit = 3) {
+  return sanityClient.fetch<PropertyCardData[]>(
+    `*[_type == "property" && status == "active" && listingType != "rent"]
+      | order(select(featured == true => 0, 1) asc, _createdAt desc, title asc)[0...$limit]{
+        _id, title, reference, price, currency, listingType, status, newBuild,
+        town, province, bedrooms, bathrooms, areaBuiltM2,
+        "slug": slug.current,
+        "features": features[0...2],
+        "imageUrl": coalesce(image.asset->url, mainImageUrl)
+      }`,
+    { limit },
+  );
+}
+
 const symbols = { EUR: "€", GBP: "£" } as const;
 
 export function formatPrice(price?: number, currency: "EUR" | "GBP" = "EUR", listingType?: string) {
