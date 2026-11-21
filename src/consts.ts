@@ -8,7 +8,7 @@ export const SITE_URL = "https://solmarhomes.example";
 /** BCP 47 locale tag used to format dates and numbers. */
 export const SITE_LOCALE = "en-US";
 /** Routes excluded from search and the sitemap. Surrounding slashes are ignored. */
-export const NOINDEX_ROUTES: string[] = ["/404", "/admin", "/brand", "/migration"];
+export const NOINDEX_ROUTES: string[] = ["/404", "/admin", "/brand", "/migration", "/compare"];
 
 /** Contact details and social profiles shown in the nav, footer, FAQ and structured data. Replace with the real ones. */
 export const SITE_PHONE = "+34 600 000 000";

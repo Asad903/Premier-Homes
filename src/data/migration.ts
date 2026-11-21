@@ -24,7 +24,6 @@ export type PageItem = {
 
 export const pages: PageItem[] = [
   { path: "/", title: "Home", group: "Core", design: true, status: "progress", note: "All sections built, including featured properties and the blogs slider; final polish pending" },
-  { path: "/info-guides", title: "Info guides", group: "Core", design: false, status: "todo", note: "In the nav but not on the live site and not in the sitemap; decide whether to build or remove the link" },
   { path: "/about-us", title: "About us", group: "Core", design: true, status: "done", note: "Stock photos stand in for the team photos; swap for real ones" },
   { path: "/contact", title: "Contact", group: "Core", design: true, status: "done", note: "Form shows the success message only; needs a backend endpoint" },
   { path: "/listing", title: "Listing / search results", group: "Core", design: true, status: "done", note: "Instant filters, price slider and Load more; Sanity-backed" },

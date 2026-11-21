@@ -537,6 +537,11 @@ const last = Math.min(page * BLOG_PAGE_SIZE, total);
       text-align: start;
     }
 
+    /* The form's default row gap suits a full page of fields; here the input and button sit 1.25rem apart, as on the live site. */
+    .blog-news_form .form_fields {
+      row-gap: 1.25rem;
+    }
+
     .blog-news_submit {
       width: 100%;
     }
